@@ -1,13 +1,11 @@
 namespace PcHouseStore.Domain.Enums;
 
-    public enum OrderStatus
-    {
-        InProgress,
-        Fixed,
-        NotFixed,
-        Finished,
-        Picked,
-        Refunded,
-        Canceled,
-        Created
-    }
+public enum OrderStatus
+{
+    Created,
+    InProgress,
+    Ready,
+    Completed,
+    Cancelled,
+    Refunded
+}

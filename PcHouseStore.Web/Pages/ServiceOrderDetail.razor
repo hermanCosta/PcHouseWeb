@@ -1,0 +1,137 @@
+@page "/service-orders/{id:long}"
+@using PcHouseStore.Domain.Enums
+@using PcHouseStore.Web.Models
+@using PcHouseStore.Web.Services
+@inject ServiceOrderService ServiceOrderService
+@inject NavigationManager Navigation
+
+<PageTitle>Service Order Details</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (order == null)
+{
+    <div class="alert alert-warning">Service order not found.</div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>Service Order @order.OrderNumber</h2>
+                    <span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span>
+                </div>
+                <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+                    <i class="oi oi-arrow-left"></i> Back to Service Orders
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header"><h5>Summary</h5></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5">Customer</dt>
+                            <dd class="col-7">@order.CustomerName</dd>
+                            <dt class="col-5">Technician</dt>
+                            <dd class="col-7">@order.ServiceDetails?.TechnicianName ?? "Unassigned"</dd>
+                            <dt class="col-5">Total</dt>
+                            <dd class="col-7">?@order.TotalAmount.ToString("F2")</dd>
+                            <dt class="col-5">Balance Due</dt>
+                            <dd class="col-7">?@order.BalanceDue.ToString("F2")</dd>
+                            <dt class="col-5">Placed</dt>
+                            <dd class="col-7">@order.PlacedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+                            <dt class="col-5">Warranty</dt>
+                            <dd class="col-7">@order.ServiceDetails?.WarrantyDays ?? 0 days</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header"><h5>Device & Notes</h5></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5">Device</dt>
+                            <dd class="col-7">@order.ServiceDetails?.DeviceBrand @order.ServiceDetails?.DeviceModel</dd>
+                            <dt class="col-5">Serial</dt>
+                            <dd class="col-7">@order.ServiceDetails?.DeviceSerial</dd>
+                            <dt class="col-5">Check-in Notes</dt>
+                            <dd class="col-7">@order.ServiceDetails?.CheckInNotes</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (order.NotesHistory != null && order.NotesHistory.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header"><h5>Notes</h5></div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var note in order.NotesHistory)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@note.EmployeeName</strong> - @note.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                                        <div>@note.Note</div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private OrderResponse? order;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrderAsync();
+    }
+
+    private async Task LoadOrderAsync()
+    {
+        try
+        {
+            order = await ServiceOrderService.GetServiceOrderAsync(Id);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/service-orders");
+    }
+
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
+    {
+        OrderStatus.Created => "bg-secondary",
+        OrderStatus.InProgress => "bg-info",
+        OrderStatus.Ready => "bg-primary",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-warning",
+        _ => "bg-secondary"
+    };
+}

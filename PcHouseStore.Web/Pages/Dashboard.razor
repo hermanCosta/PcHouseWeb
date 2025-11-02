@@ -21,8 +21,8 @@ else
         <div class="dashboard-header">
             <div class="welcome-section">
                 <h1>Welcome to PcHouse Store</h1>
-                <p class="company-info">Company: <strong>@CompanyContext.CurrentCompany?.Name</strong></p>
-                <p class="company-address">@CompanyContext.CurrentCompany?.Address</p>
+                <p class="company-info">Company: <strong>@GetCompanyDisplayName()</strong></p>
+                <p class="company-address">@GetCompanyAddress()</p>
             </div>
             <div class="user-actions">
                 <button class="btn-logout" @onclick="Logout">
@@ -254,5 +254,32 @@ else
     {
         CompanyContext.ClearCompany();
         Navigation.NavigateTo("/login");
+    }
+
+    private string GetCompanyDisplayName()
+    {
+        if (CompanyContext.CurrentCompany is null)
+        {
+            return string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(CompanyContext.CurrentCompany.TradingName)
+            ? CompanyContext.CurrentCompany.LegalName
+            : CompanyContext.CurrentCompany.TradingName!;
+    }
+
+    private string GetCompanyAddress()
+    {
+        var company = CompanyContext.CurrentCompany;
+        if (company?.BillingAddress is null)
+        {
+            return "No address on file";
+        }
+
+        var address = company.BillingAddress;
+        return string.Join(
+            ", ",
+            new[] { address.Line1, address.Line2, address.City, address.County, address.Postcode }
+                .Where(part => !string.IsNullOrWhiteSpace(part)));
     }
 }

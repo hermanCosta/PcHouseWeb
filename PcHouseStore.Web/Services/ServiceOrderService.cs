@@ -1,4 +1,5 @@
-using PcHouseStore.Domain.Models;
+using PcHouseStore.Domain.Enums;
+using PcHouseStore.Web.Models;
 
 namespace PcHouseStore.Web.Services;
 
@@ -11,50 +12,42 @@ public class ServiceOrderService
         _apiService = apiService;
     }
 
-    public async Task<IEnumerable<ServiceOrder>?> GetServiceOrdersAsync(long companyId)
+    public async Task<IEnumerable<OrderResponse>?> GetServiceOrdersAsync(long companyId, OrderStatus? status = null)
     {
-        return await _apiService.GetListAsync<ServiceOrder>($"api/serviceorders?companyId={companyId}");
+        var endpoint = status.HasValue
+            ? $"api/serviceorders?companyId={companyId}&status={status.Value}"
+            : $"api/serviceorders?companyId={companyId}";
+        return await _apiService.GetListAsync<OrderResponse>(endpoint);
     }
 
-    public async Task<ServiceOrder?> GetServiceOrderAsync(long id)
+    public async Task<OrderResponse?> GetServiceOrderAsync(long id)
     {
-        return await _apiService.GetAsync<ServiceOrder>($"api/serviceorders/{id}");
+        return await _apiService.GetAsync<OrderResponse>($"api/serviceorders/{id}");
     }
 
-    public async Task<IEnumerable<ServiceOrder>?> SearchServiceOrdersAsync(long companyId, string searchTerm)
+    public async Task<IEnumerable<OrderResponse>?> SearchServiceOrdersAsync(long companyId, string searchTerm)
     {
-        return await _apiService.GetListAsync<ServiceOrder>($"api/serviceorders/search?companyId={companyId}&searchTerm={Uri.EscapeDataString(searchTerm)}");
+        return await _apiService.GetListAsync<OrderResponse>($"api/serviceorders/search?companyId={companyId}&searchTerm={Uri.EscapeDataString(searchTerm)}");
     }
 
-    public async Task<IEnumerable<ServiceOrder>?> GetServiceOrdersByCustomerAsync(long customerId)
+    public async Task<IEnumerable<OrderResponse>?> GetServiceOrdersByCustomerAsync(long customerId)
     {
-        return await _apiService.GetListAsync<ServiceOrder>($"api/serviceorders/customer/{customerId}");
+        return await _apiService.GetListAsync<OrderResponse>($"api/serviceorders/customer/{customerId}");
     }
 
-    public async Task<IEnumerable<ServiceOrder>?> GetServiceOrdersByEmployeeAsync(long employeeId)
+    public async Task<IEnumerable<OrderResponse>?> GetServiceOrdersByTechnicianAsync(long technicianId)
     {
-        return await _apiService.GetListAsync<ServiceOrder>($"api/serviceorders/employee/{employeeId}");
+        return await _apiService.GetListAsync<OrderResponse>($"api/serviceorders/technician/{technicianId}");
     }
 
-    public async Task<IEnumerable<ServiceOrder>?> GetServiceOrdersByStatusAsync(long companyId, Domain.Enums.OrderStatus status)
+    public async Task<OrderResponse?> CreateServiceOrderAsync(CreateOrderRequest request)
     {
-        return await _apiService.GetListAsync<ServiceOrder>($"api/serviceorders/status/{status}?companyId={companyId}");
+        return await _apiService.PostAsync<CreateOrderRequest, OrderResponse>("api/serviceorders", request with { OrderType = OrderType.Service.ToString() });
     }
 
-    public async Task<long> GetLastOrderIdAsync()
+    public async Task<bool> UpdateServiceOrderAsync(long orderId, UpdateOrderRequest request)
     {
-        var result = await _apiService.GetAsync<long>("api/serviceorders/last-order-id");
-        return result;
-    }
-
-    public async Task<ServiceOrder?> CreateServiceOrderAsync(ServiceOrder serviceOrder)
-    {
-        return await _apiService.PostAsync<ServiceOrder>("api/serviceorders", serviceOrder);
-    }
-
-    public async Task<bool> UpdateServiceOrderAsync(ServiceOrder serviceOrder)
-    {
-        return await _apiService.PutAsync<ServiceOrder>($"api/serviceorders/{serviceOrder.ServiceOrderId}", serviceOrder);
+        return await _apiService.PutAsync($"api/serviceorders/{orderId}", request);
     }
 
     public async Task<bool> DeleteServiceOrderAsync(long id)

@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using PcHouseStore.Web.Services
 @inject CompanyContext CompanyContext
 @inject NavigationManager Navigation
@@ -31,7 +31,7 @@ else
         <main>
             <div class="top-row px-4">
                 <div class="company-info">
-                    <span>@CompanyContext.CurrentCompany?.Name</span>
+                    <span>@GetCompanyDisplayName()</span>
                 </div>
                 <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
             </div>
@@ -105,5 +105,17 @@ else
     public void Dispose()
     {
         CompanyContext.OnCompanyChanged -= StateHasChanged;
+    }
+
+    private string GetCompanyDisplayName()
+    {
+        if (CompanyContext.CurrentCompany is null)
+        {
+            return string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(CompanyContext.CurrentCompany.TradingName)
+            ? CompanyContext.CurrentCompany.LegalName
+            : CompanyContext.CurrentCompany.TradingName!;
     }
 }

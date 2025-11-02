@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PcHouseStore.Domain.Enums;
 using PcHouseStore.Domain.Models;
 using PcHouseStore.Infrastructure.Data;
 
@@ -10,123 +11,97 @@ public class ServiceOrderRepository : Repository<ServiceOrder>, IServiceOrderRep
     {
     }
 
-    public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByCompanyAsync(long companyId)
+    public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByCompanyAsync(long companyId, OrderStatus? status = null)
     {
-        return await _dbSet
-            .Include(so => so.Customer)
-                .ThenInclude(c => c.Person)
-            .Include(so => so.Device)
-            .Include(so => so.Employee)
-                .ThenInclude(e => e.Person)
-            .Include(so => so.Company)
-            .Include(so => so.ServiceOrderPayments)
-            .Include(so => so.ServiceOrderFaults)
-                .ThenInclude(sof => sof.Fault)
-            .Include(so => so.ServiceOrderProdServs)
-                .ThenInclude(sops => sops.ProductService)
-            .Where(so => so.CompanyId == companyId)
-            .OrderByDescending(so => so.Created)
+        return await BuildServiceOrderQuery(includeLines: true, includeNotes: false)
+            .Where(so => so.CompanyId == companyId && (!status.HasValue || so.Status == status))
+            .OrderByDescending(so => so.PlacedAt)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<ServiceOrder>> SearchServiceOrdersAsync(long companyId, string searchTerm)
     {
-        return await _dbSet
-            .Include(so => so.Customer)
-                .ThenInclude(c => c.Person)
-            .Include(so => so.Device)
-            .Include(so => so.Employee)
-                .ThenInclude(e => e.Person)
-            .Include(so => so.Company)
+        searchTerm = searchTerm.Trim();
+
+        return await BuildServiceOrderQuery(includeLines: true, includeNotes: false)
             .Where(so => so.CompanyId == companyId &&
-                        (so.Customer.Person.FirstName.Contains(searchTerm) ||
-                         so.Customer.Person.LastName.Contains(searchTerm) ||
-                         so.Customer.Person.ContactNo.Contains(searchTerm) ||
-                         so.Device.Brand!.Contains(searchTerm) ||
-                         so.Device.Model!.Contains(searchTerm) ||
-                         so.Device.SerialNumber!.Contains(searchTerm) ||
-                         so.Note!.Contains(searchTerm)))
-            .OrderByDescending(so => so.Created)
+                        (
+                            (so.Customer != null && so.Customer.Person.FirstName.Contains(searchTerm)) ||
+                            (so.Customer != null && so.Customer.Person.LastName.Contains(searchTerm)) ||
+                            so.OrderNumber.Contains(searchTerm) ||
+                            (so.Device != null && (so.Device.Brand.Contains(searchTerm) || so.Device.Model.Contains(searchTerm) || (so.Device.SerialNumber != null && so.Device.SerialNumber.Contains(searchTerm)))) ||
+                            (so.Notes != null && so.Notes.Contains(searchTerm)) ||
+                            (so.CheckInNotes != null && so.CheckInNotes.Contains(searchTerm))
+                        ))
+            .OrderByDescending(so => so.PlacedAt)
             .ToListAsync();
     }
 
     public async Task<ServiceOrder?> GetServiceOrderWithDetailsAsync(long serviceOrderId)
     {
-        return await _dbSet
-            .Include(so => so.Customer)
-                .ThenInclude(c => c.Person)
-            .Include(so => so.Device)
-            .Include(so => so.Employee)
-                .ThenInclude(e => e.Person)
-            .Include(so => so.Company)
-            .Include(so => so.ServiceOrderPayments)
-            .Include(so => so.ServiceOrderFaults)
-                .ThenInclude(sof => sof.Fault)
-            .Include(so => so.ServiceOrderProdServs)
-                .ThenInclude(sops => sops.ProductService)
-            .FirstOrDefaultAsync(so => so.ServiceOrderId == serviceOrderId);
+        return await BuildServiceOrderQuery(includeLines: true, includeNotes: true, includePayments: true)
+            .FirstOrDefaultAsync(so => so.OrderId == serviceOrderId);
     }
 
     public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByCustomerAsync(long customerId)
     {
-        return await _dbSet
-            .Include(so => so.Customer)
-                .ThenInclude(c => c.Person)
-            .Include(so => so.Device)
-            .Include(so => so.Employee)
-                .ThenInclude(e => e.Person)
-            .Include(so => so.ServiceOrderPayments)
-            .Include(so => so.ServiceOrderFaults)
-                .ThenInclude(sof => sof.Fault)
-            .Include(so => so.ServiceOrderProdServs)
-                .ThenInclude(sops => sops.ProductService)
+        return await BuildServiceOrderQuery(includeLines: true, includeNotes: false)
             .Where(so => so.CustomerId == customerId)
-            .OrderByDescending(so => so.Created)
+            .OrderByDescending(so => so.PlacedAt)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByEmployeeAsync(long employeeId)
+    public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByTechnicianAsync(long technicianId)
     {
-        return await _dbSet
-            .Include(so => so.Customer)
+        return await BuildServiceOrderQuery(includeLines: true, includeNotes: false)
+            .Where(so => so.TechnicianId == technicianId)
+            .OrderByDescending(so => so.PlacedAt)
+            .ToListAsync();
+    }
+
+    private IQueryable<ServiceOrder> BuildServiceOrderQuery(bool includeLines, bool includeNotes, bool includePayments = false)
+    {
+        IQueryable<ServiceOrder> query = _dbSet
+            .Include(so => so.Company)
+            .Include(so => so.Customer)!
                 .ThenInclude(c => c.Person)
-            .Include(so => so.Device)
-            .Include(so => so.Employee)
+            .Include(so => so.CreatedBy)
                 .ThenInclude(e => e.Person)
-            .Include(so => so.ServiceOrderPayments)
-            .Include(so => so.ServiceOrderFaults)
-                .ThenInclude(sof => sof.Fault)
-            .Include(so => so.ServiceOrderProdServs)
-                .ThenInclude(sops => sops.ProductService)
-            .Where(so => so.EmployeeId == employeeId)
-            .OrderByDescending(so => so.Created)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<ServiceOrder>> GetServiceOrdersByStatusAsync(long companyId, Domain.Enums.OrderStatus status)
-    {
-        return await _dbSet
-            .Include(so => so.Customer)
-                .ThenInclude(c => c.Person)
+            .Include(so => so.StatusHistory)
+                .ThenInclude(sh => sh.ChangedBy)
+                    .ThenInclude(e => e.Person)
             .Include(so => so.Device)
-            .Include(so => so.Employee)
+            .Include(so => so.Technician)
                 .ThenInclude(e => e.Person)
-            .Include(so => so.ServiceOrderPayments)
-            .Include(so => so.ServiceOrderFaults)
-                .ThenInclude(sof => sof.Fault)
-            .Include(so => so.ServiceOrderProdServs)
-                .ThenInclude(sops => sops.ProductService)
-            .Where(so => so.CompanyId == companyId && so.Status == status)
-            .OrderByDescending(so => so.Created)
-            .ToListAsync();
-    }
+            .Include(so => so.Faults)
+                .ThenInclude(of => of.Fault);
 
-    public async Task<long> GetLastOrderIdAsync()
-    {
-        var lastOrder = await _dbSet
-            .OrderByDescending(so => so.ServiceOrderId)
-            .FirstOrDefaultAsync();
+        if (includeLines)
+        {
+            query = query
+                .Include(so => so.Lines)
+                    .ThenInclude(ol => ol.CatalogItem)
+                .Include(so => so.Lines)
+                    .ThenInclude(ol => ol.RefurbItem);
+        }
 
-        return lastOrder?.ServiceOrderId ?? 0;
+        if (includePayments)
+        {
+            query = query
+                .Include(so => so.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
+                .Include(so => so.Refunds)
+                    .ThenInclude(r => r.Payment);
+        }
+
+        if (includeNotes)
+        {
+            query = query
+                .Include(so => so.NotesHistory)
+                    .ThenInclude(n => n.Employee)
+                        .ThenInclude(e => e.Person);
+        }
+
+        return query.AsSplitQuery();
     }
 }

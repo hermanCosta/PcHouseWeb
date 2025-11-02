@@ -101,6 +101,28 @@ public class ApiService
         }
     }
 
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(data, _jsonOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(endpoint, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<TResponse>(responseJson, _jsonOptions);
+            }
+            return default;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in PostAsync: {ex.Message}");
+            return default;
+        }
+    }
+
     public async Task<bool> PutAsync<T>(string endpoint, T data)
     {
         try

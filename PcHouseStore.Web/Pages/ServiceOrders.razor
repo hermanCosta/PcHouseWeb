@@ -1,153 +1,144 @@
 @page "/service-orders"
-@using PcHouseStore.Domain.Models
 @using PcHouseStore.Domain.Enums
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
 @inject ServiceOrderService ServiceOrderService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Service Orders Management</PageTitle>
+<PageTitle>Service Orders</PageTitle>
 
 <div class="container-fluid">
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <h2>Service Orders Management</h2>
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Service Orders</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Service Orders</li>
+                        </ol>
+                    </nav>
+                </div>
                 <div>
                     <button class="btn btn-primary" @onclick="CreateNewServiceOrder">
                         <i class="oi oi-plus"></i> New Service Order
-                    </button>
-                </div>
-                <div class="d-flex gap-2">
-                    <select class="form-select" @bind="selectedStatus" @bind:after="FilterByStatus" style="width: 200px;">
-                        <option value="">All Statuses</option>
-                        <option value="@OrderStatus.Created">Created</option>
-                        <option value="@OrderStatus.InProgress">In Progress</option>
-                        <option value="@OrderStatus.Fixed">Fixed</option>
-                        <option value="@OrderStatus.NotFixed">Not Fixed</option>
-                        <option value="@OrderStatus.Finished">Finished</option>
-                        <option value="@OrderStatus.Picked">Picked</option>
-                    </select>
-                    <input type="text" class="form-control" placeholder="Search orders..." @bind="searchTerm" @onkeypress="OnSearchKeyPress" style="width: 300px;" />
-                    <button class="btn btn-outline-secondary" @onclick="SearchServiceOrders">
-                        <i class="oi oi-magnifying-glass"></i> Search
-                    </button>
-                    <button class="btn btn-outline-secondary" @onclick="LoadServiceOrders">
-                        <i class="oi oi-reload"></i> Refresh
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (isLoading)
-    {
-        <div class="text-center">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-    else if (serviceOrders?.Any() == true)
-    {
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="text" class="form-control" placeholder="Search service orders..." @bind="searchTerm" @bind:event="oninput">
+                        <button class="btn btn-outline-secondary" @onclick="SearchServiceOrdersAsync">
+                            <i class="oi oi-magnifying-glass"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="LoadServiceOrdersAsync">
+                            <i class="oi oi-loop"></i>
+                        </button>
+                        <select class="form-select" style="width: 200px;" @bind="selectedStatus" @onchange="async _ => await LoadServiceOrdersAsync()">
+                            <option value="">All Statuses</option>
+                            @foreach (var status in Enum.GetValues<OrderStatus>())
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (serviceOrders != null && serviceOrders.Any())
+                    {
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-dark">
+                            <table class="table table-hover align-middle">
+                                <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Order #</th>
                                         <th>Customer</th>
-                                        <th>Device</th>
-                                        <th>Employee</th>
+                                        <th>Technician</th>
                                         <th>Total</th>
-                                        <th>Due</th>
                                         <th>Status</th>
-                                        <th>Created</th>
-                                        <th>Finished</th>
-                                        <th>Actions</th>
+                                        <th>Placed</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var order in serviceOrders)
                                     {
-                                        <tr>
-                                            <td>@order.ServiceOrderId</td>
-                                            <td>@(order.Customer?.Person?.FullName ?? "N/A")</td>
-                                            <td>@(order.Device?.DisplayName ?? "N/A")</td>
-                                            <td>@(order.Employee?.Person?.FullName ?? "N/A")</td>
-                                            <td>€@order.Total.ToString()</td>
-                                            <td>€@order.Due.ToString()</td>
-                                            <td>
-                                                <span class="badge @GetStatusBadgeClass(order.Status)">
-                                                    @order.Status
-                                                </span>
-                                            </td>
-                                            <td>@order.Created.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>@(order.Finished?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewServiceOrder(order.ServiceOrderId)">
-                                                        <i class="oi oi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning" @onclick="() => EditServiceOrder(order.ServiceOrderId)">
-                                                        <i class="oi oi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteServiceOrder(order.ServiceOrderId)">
-                                                        <i class="oi oi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>@order.OrderNumber</td>
+                                        <td>@order.CustomerName</td>
+                                        <td>@order.ServiceDetails?.TechnicianName ?? "Unassigned"</td>
+                                        <td>?@order.TotalAmount.ToString("F2")</td>
+                                        <td><span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span></td>
+                                        <td>@order.PlacedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-info" @onclick="() => ViewServiceOrder(order.OrderId)" title="View">
+                                                    <i class="oi oi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteServiceOrderAsync(order.OrderId)" title="Delete">
+                                                    <i class="oi oi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="oi oi-wrench display-3 text-muted"></i>
+                            <h4>No service orders found</h4>
+                            <p class="text-muted">Create a service order to track repair work.</p>
+                            <button class="btn btn-primary" @onclick="CreateNewServiceOrder">Create Service Order</button>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h4>No Service Orders Found</h4>
-                    <p>There are no service orders to display. Create your first service order to get started.</p>
-                    <button class="btn btn-primary" @onclick="CreateNewServiceOrder">Create New Service Order</button>
-                </div>
-            </div>
-        </div>
-    }
+    </div>
 </div>
 
 @code {
-    private List<ServiceOrder>? serviceOrders;
-    private bool isLoading = true;
-    private string searchTerm = "";
+    private List<OrderResponse>? serviceOrders;
+    private string searchTerm = string.Empty;
     private OrderStatus? selectedStatus;
-    private long currentCompanyId = 1; // This should come from authentication context
+    private long currentCompanyId = 1;
+    private bool isLoading;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadServiceOrders();
+        await LoadServiceOrdersAsync();
     }
 
-    private async Task LoadServiceOrders()
+    private async Task LoadServiceOrdersAsync()
     {
         isLoading = true;
         StateHasChanged();
-        
         try
         {
-            serviceOrders = (await ServiceOrderService.GetServiceOrdersAsync(currentCompanyId))?.ToList();
+            serviceOrders = (await ServiceOrderService.GetServiceOrdersAsync(currentCompanyId, selectedStatus))?.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading service orders: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to load service orders: {ex.Message}");
         }
         finally
         {
@@ -156,63 +147,28 @@
         }
     }
 
-    private async Task SearchServiceOrders()
+    private async Task SearchServiceOrdersAsync()
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            await LoadServiceOrders();
+            await LoadServiceOrdersAsync();
             return;
         }
 
         isLoading = true;
         StateHasChanged();
-        
         try
         {
             serviceOrders = (await ServiceOrderService.SearchServiceOrdersAsync(currentCompanyId, searchTerm))?.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error searching service orders: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to search service orders: {ex.Message}");
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
-        }
-    }
-
-    private async Task FilterByStatus()
-    {
-        if (selectedStatus == null)
-        {
-            await LoadServiceOrders();
-            return;
-        }
-
-        isLoading = true;
-        StateHasChanged();
-        
-        try
-        {
-            serviceOrders = (await ServiceOrderService.GetServiceOrdersByStatusAsync(currentCompanyId, selectedStatus.Value))?.ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error filtering service orders: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task OnSearchKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await SearchServiceOrders();
         }
     }
 
@@ -221,41 +177,44 @@
         Navigation.NavigateTo("/service-orders/create");
     }
 
-    private void ViewServiceOrder(long id)
+    private void ViewServiceOrder(long orderId)
     {
-        Navigation.NavigateTo($"/service-orders/{id}");
+        Navigation.NavigateTo($"/service-orders/{orderId}");
     }
 
-    private void EditServiceOrder(long id)
+    private async Task DeleteServiceOrderAsync(long orderId)
     {
-        Navigation.NavigateTo($"/service-orders/{id}/edit");
-    }
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this service order?");
+        if (!confirm)
+            return;
 
-    private async Task DeleteServiceOrder(long id)
-    {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this service order?" }))
+        try
         {
-            var success = await ServiceOrderService.DeleteServiceOrderAsync(id);
+            var success = await ServiceOrderService.DeleteServiceOrderAsync(orderId);
             if (success)
             {
-                await LoadServiceOrders();
+                await JSRuntime.InvokeVoidAsync("alert", "Service order deleted successfully.");
+                await LoadServiceOrdersAsync();
             }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to delete service order.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error deleting service order: {ex.Message}");
         }
     }
 
-    private string GetStatusBadgeClass(OrderStatus status)
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
     {
-        return status switch
-        {
-            OrderStatus.Created => "bg-secondary",
-            OrderStatus.InProgress => "bg-warning",
-            OrderStatus.Fixed => "bg-success",
-            OrderStatus.NotFixed => "bg-danger",
-            OrderStatus.Finished => "bg-info",
-            OrderStatus.Picked => "bg-primary",
-            OrderStatus.Canceled => "bg-dark",
-            OrderStatus.Refunded => "bg-light text-dark",
-            _ => "bg-secondary"
-        };
-    }
+        OrderStatus.Created => "bg-secondary",
+        OrderStatus.InProgress => "bg-info",
+        OrderStatus.Ready => "bg-primary",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-warning",
+        _ => "bg-secondary"
+    };
 }

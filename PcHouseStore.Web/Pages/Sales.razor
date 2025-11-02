@@ -1,149 +1,144 @@
 @page "/sales"
-@using PcHouseStore.Domain.Models
 @using PcHouseStore.Domain.Enums
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
-@inject SaleService SaleService
+@inject OrderService OrderService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Sales Management</PageTitle>
+<PageTitle>Retail Orders</PageTitle>
 
 <div class="container-fluid">
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <h2>Sales Management</h2>
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <button class="btn btn-primary" @onclick="CreateNewSale">
-                        <i class="oi oi-plus"></i> New Sale
-                    </button>
+                    <h2>Retail Orders</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Retail Orders</li>
+                        </ol>
+                    </nav>
                 </div>
                 <div class="d-flex gap-2">
-                    <input type="text" class="form-control" placeholder="Search sales..." @bind="searchTerm"
-                        @onkeypress="OnSearchKeyPress" style="width: 300px;" />
-                    <button class="btn btn-outline-secondary" @onclick="SearchSales">
-                        <i class="oi oi-magnifying-glass"></i> Search
-                    </button>
-                    <button class="btn btn-outline-secondary" @onclick="LoadSales">
-                        <i class="oi oi-reload"></i> Refresh
+                    <select class="form-select" style="width: 200px;" @bind="selectedOrderType" @onchange="async _ => await LoadOrdersAsync()">
+                        <option value="Retail">Retail Orders</option>
+                        <option value="Refurb">Refurb Orders</option>
+                        <option value="">All Orders</option>
+                    </select>
+                    <button class="btn btn-primary" @onclick="CreateNewOrder">
+                        <i class="oi oi-plus"></i> New Order
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (isLoading)
-    {
-        <div class="text-center">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-    else if (sales?.Any() == true)
-    {
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="text" class="form-control" placeholder="Search orders..." @bind="searchTerm" @bind:event="oninput">
+                        <button class="btn btn-outline-secondary" @onclick="SearchOrdersAsync">
+                            <i class="oi oi-magnifying-glass"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="LoadOrdersAsync">
+                            <i class="oi oi-loop"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (orders != null && orders.Any())
+                    {
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-dark">
+                            <table class="table table-hover align-middle">
+                                <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Order #</th>
                                         <th>Customer</th>
-                                        <th>Employee</th>
                                         <th>Total</th>
-                                        <th>Remaining</th>
+                                        <th>Balance Due</th>
                                         <th>Status</th>
-                                        <th>Sale Type</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
+                                        <th>Type</th>
+                                        <th>Placed</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var sale in sales)
+                                    @foreach (var order in orders)
                                     {
-                                        <tr>
-                                            <td>@sale.SaleId</td>
-                                            <td>@(sale.Customer?.Person?.FullName ?? "N/A")</td>
-                                            <td>@(sale.Employee?.Person?.FullName ?? "N/A")</td>
-                                            <td>€@sale.Total.ToString("F2")</td>
-                                            <td>€@(sale.Remaining.ToString() ?? "0.00")</td>
-                                            <td>
-                                                <span class="badge @GetStatusBadgeClass(sale.Status)">
-                                                    @sale.Status
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge @GetSaleTypeBadgeClass(sale.SaleType)">
-                                                    @sale.SaleType
-                                                </span>
-                                            </td>
-                                            <td>@sale.Created.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button class="btn btn-sm btn-outline-primary"
-                                                        @onclick="() => ViewSale(sale.SaleId)">
-                                                        <i class="oi oi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning"
-                                                        @onclick="() => EditSale(sale.SaleId)">
-                                                        <i class="oi oi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                        @onclick="() => DeleteSale(sale.SaleId)">
-                                                        <i class="oi oi-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>@order.OrderNumber</td>
+                                        <td>@order.CustomerName</td>
+                                        <td>?@order.TotalAmount.ToString("F2")</td>
+                                        <td>?@order.BalanceDue.ToString("F2")</td>
+                                        <td><span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span></td>
+                                        <td><span class="badge @GetOrderTypeBadgeClass(order.OrderType)">@order.OrderType</span></td>
+                                        <td>@order.PlacedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-info" @onclick="() => ViewOrder(order.OrderId)" title="View">
+                                                    <i class="oi oi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteOrderAsync(order.OrderId)" title="Delete">
+                                                    <i class="oi oi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="oi oi-cart display-3 text-muted"></i>
+                            <h4>No orders found</h4>
+                            <p class="text-muted">Create a new order to get started.</p>
+                            <button class="btn btn-primary" @onclick="CreateNewOrder">Create Order</button>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h4>No Sales Found</h4>
-                    <p>There are no sales to display. Create your first sale to get started.</p>
-                    <button class="btn btn-primary" @onclick="CreateNewSale">Create New Sale</button>
-                </div>
-            </div>
-        </div>
-    }
+    </div>
 </div>
 
 @code {
-    private List<Sale>? sales;
-    private bool isLoading = true;
-    private string searchTerm = "";
-    private long currentCompanyId = 1; // This should come from authentication context
+    private List<OrderResponse>? orders;
+    private string searchTerm = string.Empty;
+    private string selectedOrderType = OrderType.Retail.ToString();
+    private long currentCompanyId = 1;
+    private bool isLoading;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSales();
+        await LoadOrdersAsync();
     }
 
-    private async Task LoadSales()
+    private async Task LoadOrdersAsync()
     {
         isLoading = true;
         StateHasChanged();
-
         try
         {
-            sales = (await SaleService.GetSalesAsync(currentCompanyId))?.ToList();
+            orders = (await OrderService.GetOrdersAsync(currentCompanyId, ParseOrderType(selectedOrderType)))?.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading sales: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to load orders: {ex.Message}");
         }
         finally
         {
@@ -152,24 +147,23 @@
         }
     }
 
-    private async Task SearchSales()
+    private async Task SearchOrdersAsync()
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            await LoadSales();
+            await LoadOrdersAsync();
             return;
         }
 
         isLoading = true;
         StateHasChanged();
-
         try
         {
-            sales = (await SaleService.SearchSalesAsync(currentCompanyId, searchTerm))?.ToList();
+            orders = (await OrderService.SearchOrdersAsync(currentCompanyId, searchTerm, ParseOrderType(selectedOrderType)))?.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error searching sales: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to search orders: {ex.Message}");
         }
         finally
         {
@@ -178,61 +172,67 @@
         }
     }
 
-    private async Task OnSearchKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await SearchSales();
-        }
-    }
-
-    private void CreateNewSale()
+    private void CreateNewOrder()
     {
         Navigation.NavigateTo("/sales/create");
     }
 
-    private void ViewSale(long id)
+    private void ViewOrder(long orderId)
     {
-        Navigation.NavigateTo($"/sales/{id}");
+        Navigation.NavigateTo($"/sales/{orderId}");
     }
 
-    private void EditSale(long id)
+    private async Task DeleteOrderAsync(long orderId)
     {
-        Navigation.NavigateTo($"/sales/{id}/edit");
-    }
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this order?");
+        if (!confirm)
+            return;
 
-    private async Task DeleteSale(long id)
-    {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this sale?" }))
+        try
         {
-            var success = await SaleService.DeleteSaleAsync(id);
+            var success = await OrderService.DeleteOrderAsync(orderId);
             if (success)
             {
-                await LoadSales();
+                await JSRuntime.InvokeVoidAsync("alert", "Order deleted successfully.");
+                await LoadOrdersAsync();
             }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to delete order.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error deleting order: {ex.Message}");
         }
     }
 
-    private string GetStatusBadgeClass(OrderStatus status)
+    private static OrderType? ParseOrderType(string? value)
     {
-        return status switch
+        if (Enum.TryParse<OrderType>(value, true, out var parsed))
         {
-            OrderStatus.Created => "bg-secondary",
-            OrderStatus.InProgress => "bg-warning",
-            OrderStatus.Finished => "bg-success",
-            OrderStatus.Canceled => "bg-danger",
-            OrderStatus.Refunded => "bg-info",
-            _ => "bg-secondary"
-        };
+            return parsed;
+        }
+        return null;
     }
 
-    private string GetSaleTypeBadgeClass(SaleType saleType)
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
     {
-        return saleType switch
-        {
-            SaleType.Common => "bg-primary",
-            SaleType.Refurb => "bg-success",
-            _ => "bg-secondary"
-        };
-    }
+        OrderStatus.Created => "bg-secondary",
+        OrderStatus.InProgress => "bg-info",
+        OrderStatus.Ready => "bg-primary",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-warning",
+        _ => "bg-secondary"
+    };
+
+    private static string GetOrderTypeBadgeClass(OrderType orderType) => orderType switch
+    {
+        OrderType.Retail => "bg-primary",
+        OrderType.Refurb => "bg-success",
+        OrderType.Service => "bg-warning",
+        OrderType.SpecialOrder => "bg-info",
+        _ => "bg-secondary"
+    };
 }
