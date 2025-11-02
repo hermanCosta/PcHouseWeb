@@ -1,0 +1,212 @@
+@page "/customers/create"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Services
+@inject CustomerService CustomerService
+@inject CompanyService CompanyService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create New Customer</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Create New Customer</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/customers">Customers</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" @bind="person.FirstName"
+                                        placeholder="Enter first name" required />
+                                    <ValidationMessage For="@(() => person.FirstName)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" @bind="person.LastName"
+                                        placeholder="Enter last name" required />
+                                    <ValidationMessage For="@(() => person.LastName)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Number *</label>
+                                    <input type="tel" class="form-control" @bind="person.ContactNo"
+                                        placeholder="Enter contact number" required />
+                                    <ValidationMessage For="@(() => person.ContactNo)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" @bind="person.Email"
+                                        placeholder="Enter email address" />
+                                    <ValidationMessage For="@(() => person.Email)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Company *</label>
+                            <select class="form-select" @bind="customer.CompanyId" required>
+                                <option value="">Select Company</option>
+                                @if (companies != null)
+                                {
+                                    @foreach (var company in companies)
+                                    {
+                                        <option value="@company.CompanyId">@company.Name</option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => customer.CompanyId)" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                                <i class="oi oi-x"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                <i class="oi oi-check"></i> Create Customer
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Customer Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Name:</strong> @person.FullName
+                    </div>
+                    <div class="mb-2">
+                        <strong>Contact:</strong> @person.ContactNo
+                    </div>
+                    <div class="mb-2">
+                        <strong>Email:</strong> @(person.Email ?? "N/A")
+                    </div>
+                    <div class="mb-2">
+                        <strong>Company:</strong> @(companies?.FirstOrDefault(c => c.CompanyId ==
+                                                customer.CompanyId)?.Name ??
+                                                "N/A")
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6>Business Rules</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li>✅ First name is required</li>
+                        <li>✅ Last name is required</li>
+                        <li>✅ Contact number is required</li>
+                        <li>✅ Email must be valid format (optional)</li>
+                        <li>✅ Company association required</li>
+                        <li>✅ Multi-company support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Customer customer = new()
+    {
+        CompanyId = 1 // This should come from authentication context
+    };
+
+    private Person person = new();
+
+    private List<Company>? companies;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompanies();
+    }
+
+    private async Task LoadCompanies()
+    {
+        try
+        {
+            companies = (await CompanyService.GetCompaniesAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading companies: {ex.Message}");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // First create the person
+            // In a real app, you'd have a PersonService
+            person.PersonId = 1; // Mock ID
+            customer.PersonId = person.PersonId;
+
+            var createdCustomer = await CustomerService.CreateCustomerAsync(customer);
+            if (createdCustomer != null)
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Customer created successfully!");
+                Navigation.NavigateTo("/customers");
+            }
+            else
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Failed to create customer. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeAsync<object>("alert", $"Error creating customer: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/customers");
+    }
+}

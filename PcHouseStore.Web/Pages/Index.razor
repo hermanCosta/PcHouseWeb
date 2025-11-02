@@ -1,0 +1,69 @@
+﻿@page "/"
+@using PcHouseStore.Web.Services
+@inject CompanyContext CompanyContext
+@inject NavigationManager Navigation
+
+<PageTitle>PcHouse Store</PageTitle>
+
+@if (CompanyContext.IsAuthenticated)
+{
+    <div class="welcome-container">
+        <h1>Welcome to PcHouse Store</h1>
+        <p>You are logged in as: <strong>@CompanyContext.CurrentCompany?.Name</strong></p>
+        <button class="btn-dashboard" @onclick="@(() => Navigation.NavigateTo("/dashboard"))">
+            Go to Dashboard
+        </button>
+    </div>
+}
+else
+{
+    <div class="login-redirect">
+        <h1>PcHouse Store Management System</h1>
+        <p>Please log in to access your company's management system.</p>
+        <button class="btn-login" @onclick="@(() => Navigation.NavigateTo("/login"))">
+            Login
+        </button>
+    </div>
+}
+
+<style>
+    .welcome-container, .login-redirect {
+        text-align: center;
+        padding: 50px 20px;
+        max-width: 600px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-container h1, .login-redirect h1 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .welcome-container p, .login-redirect p {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 18px;
+    }
+
+    .btn-dashboard, .btn-login {
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-dashboard:hover, .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+</style>

@@ -1,0 +1,209 @@
+@page "/products/create"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Services
+@inject PcHouseStore.Web.Services.ProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create New Product/Service</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Create New Product/Service</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/products">Products</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Product/Service Information</h5>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Name *</label>
+                            <input type="text" class="form-control" @bind="product.Name"
+                                placeholder="Enter product or service name" required />
+                            <ValidationMessage For="@(() => product.Name)" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Category</label>
+                                    <input type="text" class="form-control" @bind="product.Category"
+                                        placeholder="e.g., Hardware, Software, Service" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Price *</label>
+                                    <InputNumber class="form-control" @bind-Value="product.Price" placeholder="0.00"
+                                        step="0.01" min="0" required />
+                                    <ValidationMessage For="@(() => product.Price)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Quantity *</label>
+                                    <InputNumber class="form-control" @bind-Value="product.Quantity" placeholder="0"
+                                        min="0" required />
+                                    <ValidationMessage For="@(() => product.Quantity)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Minimum Quantity *</label>
+                                    <InputNumber class="form-control" @bind-Value="product.MinQuantity" placeholder="0"
+                                        min="0" required />
+                                    <ValidationMessage For="@(() => product.MinQuantity)" />
+                                    <div class="form-text">Alert will be shown when stock falls below this level</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" @bind="product.Note" rows="3"
+                                placeholder="Enter any additional notes about this product or service..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                                <i class="oi oi-x"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                <i class="oi oi-check"></i> Create Product/Service
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Product Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Name:</strong> @product.Name
+                    </div>
+                    <div class="mb-2">
+                        <strong>Category:</strong> @(product.Category ?? "N/A")
+                    </div>
+                    <div class="mb-2">
+                        <strong>Price:</strong> €@product.Price.ToString()
+                    </div>
+                    <div class="mb-2">
+                        <strong>Quantity:</strong> @product.Quantity
+                    </div>
+                    <div class="mb-2">
+                        <strong>Min Quantity:</strong> @product.MinQuantity
+                    </div>
+                    <div class="mb-2">
+                        <strong>Stock Status:</strong>
+                        @if (product.IsLowStock)
+                        {
+                            <span class="badge bg-warning text-dark">Low Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">In Stock</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6>Business Rules</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li>✅ Price cannot be negative</li>
+                        <li>✅ Quantity cannot be negative</li>
+                        <li>✅ Minimum quantity cannot be negative</li>
+                        <li>✅ Low stock alert when quantity ≤ minimum</li>
+                        <li>✅ Company-scoped inventory</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PcHouseStore.Domain.Models.ProductService product = new()
+    {
+        CompanyId = 1, // This should come from authentication context
+        Name = "",
+        Category = "",
+        Price = 0,
+        Quantity = 0,
+        MinQuantity = 0,
+        Note = ""
+    };
+
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            // Check if product already exists
+            var exists = await ProductService.CheckProductExistsAsync(product.Name, product.CompanyId);
+            if (exists)
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "A product with this name already exists for this company.");
+                return;
+            }
+
+            var createdProduct = await ProductService.CreateProductAsync(product);
+            if (createdProduct != null)
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Product/Service created successfully!");
+                Navigation.NavigateTo("/products");
+            }
+            else
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Failed to create product/service. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeAsync<object>("alert", $"Error creating product/service: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}

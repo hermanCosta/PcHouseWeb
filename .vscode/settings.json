@@ -1,0 +1,18 @@
+{
+    "git.ignoreLimitWarning": true,
+    "dotnet.defaultSolution": "PcHouseStore.sln",
+    "omnisharp.enableEditorConfigSupport": true,
+    "omnisharp.enableRoslynAnalyzers": true,
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    "debug.console.fontSize": 14,
+    "debug.console.lineHeight": 20,
+    "debug.internalConsoleOptions": "openOnSessionStart",
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true
+}

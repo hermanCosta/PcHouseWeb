@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "q9tpuAOO0edM5DArCMmO+ahp8DU3H2mPiYYK9FjmsXs=",
+  "Source": "PcHouseStore.API",
+  "BasePath": "_content/PcHouseStore.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -1,0 +1,238 @@
+@page "/sales"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Domain.Enums
+@using PcHouseStore.Web.Services
+@inject SaleService SaleService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sales Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Sales Management</h2>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-primary" @onclick="CreateNewSale">
+                        <i class="oi oi-plus"></i> New Sale
+                    </button>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Search sales..." @bind="searchTerm"
+                        @onkeypress="OnSearchKeyPress" style="width: 300px;" />
+                    <button class="btn btn-outline-secondary" @onclick="SearchSales">
+                        <i class="oi oi-magnifying-glass"></i> Search
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="LoadSales">
+                        <i class="oi oi-reload"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (sales?.Any() == true)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Employee</th>
+                                        <th>Total</th>
+                                        <th>Remaining</th>
+                                        <th>Status</th>
+                                        <th>Sale Type</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sale in sales)
+                                    {
+                                        <tr>
+                                            <td>@sale.SaleId</td>
+                                            <td>@(sale.Customer?.Person?.FullName ?? "N/A")</td>
+                                            <td>@(sale.Employee?.Person?.FullName ?? "N/A")</td>
+                                            <td>€@sale.Total.ToString("F2")</td>
+                                            <td>€@(sale.Remaining.ToString() ?? "0.00")</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(sale.Status)">
+                                                    @sale.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetSaleTypeBadgeClass(sale.SaleType)">
+                                                    @sale.SaleType
+                                                </span>
+                                            </td>
+                                            <td>@sale.Created.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-primary"
+                                                        @onclick="() => ViewSale(sale.SaleId)">
+                                                        <i class="oi oi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning"
+                                                        @onclick="() => EditSale(sale.SaleId)">
+                                                        <i class="oi oi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => DeleteSale(sale.SaleId)">
+                                                        <i class="oi oi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h4>No Sales Found</h4>
+                    <p>There are no sales to display. Create your first sale to get started.</p>
+                    <button class="btn btn-primary" @onclick="CreateNewSale">Create New Sale</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Sale>? sales;
+    private bool isLoading = true;
+    private string searchTerm = "";
+    private long currentCompanyId = 1; // This should come from authentication context
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSales();
+    }
+
+    private async Task LoadSales()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            sales = (await SaleService.GetSalesAsync(currentCompanyId))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading sales: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchSales()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadSales();
+            return;
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            sales = (await SaleService.SearchSalesAsync(currentCompanyId, searchTerm))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching sales: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchSales();
+        }
+    }
+
+    private void CreateNewSale()
+    {
+        Navigation.NavigateTo("/sales/create");
+    }
+
+    private void ViewSale(long id)
+    {
+        Navigation.NavigateTo($"/sales/{id}");
+    }
+
+    private void EditSale(long id)
+    {
+        Navigation.NavigateTo($"/sales/{id}/edit");
+    }
+
+    private async Task DeleteSale(long id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this sale?" }))
+        {
+            var success = await SaleService.DeleteSaleAsync(id);
+            if (success)
+            {
+                await LoadSales();
+            }
+        }
+    }
+
+    private string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Created => "bg-secondary",
+            OrderStatus.InProgress => "bg-warning",
+            OrderStatus.Finished => "bg-success",
+            OrderStatus.Canceled => "bg-danger",
+            OrderStatus.Refunded => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetSaleTypeBadgeClass(SaleType saleType)
+    {
+        return saleType switch
+        {
+            SaleType.Common => "bg-primary",
+            SaleType.Refurb => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}

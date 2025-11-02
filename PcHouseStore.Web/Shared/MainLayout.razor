@@ -1,0 +1,109 @@
+﻿@inherits LayoutComponentBase
+@using PcHouseStore.Web.Services
+@inject CompanyContext CompanyContext
+@inject NavigationManager Navigation
+
+<PageTitle>PcHouse Store - Computer Sales & Repairs</PageTitle>
+
+@if (IsLoginPage)
+{
+    @Body
+}
+else if (!CompanyContext.IsAuthenticated)
+{
+    <div class="auth-redirect">
+        <div class="auth-message">
+            <h2>Authentication Required</h2>
+            <p>Please log in to access the application.</p>
+            <button class="btn-login-redirect" @onclick="@(() => Navigation.NavigateTo("/login"))">
+                Go to Login
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <div class="top-row px-4">
+                <div class="company-info">
+                    <span>@CompanyContext.CurrentCompany?.Name</span>
+                </div>
+                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+}
+
+<style>
+    .auth-redirect {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--pchouse-primary) 0%, var(--pchouse-primary-dark) 100%);
+    }
+
+    .auth-message {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+    }
+
+    .auth-message h2 {
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .auth-message p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    .btn-login-redirect {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--pchouse-primary), var(--pchouse-primary-dark));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login-redirect:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .company-info {
+        color: #333;
+        font-weight: 500;
+        margin-right: 20px;
+    }
+</style>
+
+@code {
+    private bool IsLoginPage => Navigation.Uri.EndsWith("/login");
+
+    protected override void OnInitialized()
+    {
+        CompanyContext.OnCompanyChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CompanyContext.OnCompanyChanged -= StateHasChanged;
+    }
+}

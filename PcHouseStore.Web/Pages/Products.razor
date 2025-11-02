@@ -1,0 +1,239 @@
+@page "/products"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Services
+@inject PcHouseStore.Web.Services.ProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Products & Services Management</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Products & Services Management</h2>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-primary" @onclick="CreateNewProduct">
+                        <i class="oi oi-plus"></i> New Product/Service
+                    </button>
+                    <button class="btn btn-warning" @onclick="ViewLowStock">
+                        <i class="oi oi-warning"></i> Low Stock
+                    </button>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Search products..." @bind="searchTerm"
+                        @onkeypress="OnSearchKeyPress" style="width: 300px;" />
+                    <button class="btn btn-outline-secondary" @onclick="SearchProducts">
+                        <i class="oi oi-magnifying-glass"></i> Search
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="LoadProducts">
+                        <i class="oi oi-reload"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (products?.Any() == true)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Quantity</th>
+                                        <th>Min Quantity</th>
+                                        <th>Price</th>
+                                        <th>Stock Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in products)
+                                    {
+                                        <tr class="@(product.IsLowStock ? "table-warning" : "")">
+                                            <td>@product.ProductServiceId</td>
+                                            <td>@product.Name</td>
+                                            <td>@(product.Category ?? "N/A")</td>
+                                            <td>@product.Quantity</td>
+                                            <td>@product.MinQuantity</td>
+                                            <td>€@product.Price.ToString()</td>
+                                            <td>
+                                                @if (product.IsLowStock)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="oi oi-warning"></i> Low Stock
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">In Stock</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-primary"
+                                                        @onclick="() => ViewProduct(product.ProductServiceId)">
+                                                        <i class="oi oi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning"
+                                                        @onclick="() => EditProduct(product.ProductServiceId)">
+                                                        <i class="oi oi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => DeleteProduct(product.ProductServiceId)">
+                                                        <i class="oi oi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h4>No Products Found</h4>
+                    <p>There are no products or services to display. Create your first product to get started.</p>
+                    <button class="btn btn-primary" @onclick="CreateNewProduct">Create New Product</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<PcHouseStore.Domain.Models.ProductService>? products = new();
+    private bool isLoading = true;
+    private string searchTerm = "";
+    private long currentCompanyId = 1; // This should come from authentication context
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await ProductService.GetProductsAsync(currentCompanyId);
+            products = result?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading products: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchProducts()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadProducts();
+            return;
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            products = (await ProductService.SearchProductsAsync(searchTerm))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching products: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ViewLowStock()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            products = (await ProductService.GetLowStockProductsAsync(currentCompanyId))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading low stock products: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchProducts();
+        }
+    }
+
+    private void CreateNewProduct()
+    {
+        Navigation.NavigateTo("/products/create");
+    }
+
+    private void ViewProduct(long id)
+    {
+        Navigation.NavigateTo($"/products/{id}");
+    }
+
+    private void EditProduct(long id)
+    {
+        Navigation.NavigateTo($"/products/{id}/edit");
+    }
+
+    private async Task DeleteProduct(long id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this product?" }))
+        {
+            var success = await ProductService.DeleteProductAsync(id);
+            if (success)
+            {
+                await LoadProducts();
+            }
+        }
+    }
+}

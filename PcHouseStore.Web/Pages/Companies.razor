@@ -1,0 +1,207 @@
+@page "/companies"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Services
+@inject CompanyService CompanyService
+@inject CompanyContext CompanyContext
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Company Management</PageTitle>
+
+@if (!CompanyContext.IsAuthenticated)
+{
+    <div class="unauthorized">
+        <h2>Access Denied</h2>
+        <p>You need to be logged in to access this page.</p>
+        <button class="btn-primary" @onclick="@(() => Navigation.NavigateTo("/login"))">
+            Go to Login
+        </button>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Company Management</h2>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-primary" @onclick="CreateNewCompany">
+                        <i class="oi oi-plus"></i> New Company
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-outline-secondary" @onclick="LoadCompanies">
+                        <i class="oi oi-reload"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (companies?.Any() == true)
+    {
+        <div class="row">
+            @foreach (var company in companies)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">@company.Name</h5>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewCompany(company.CompanyId)">
+                                    <i class="oi oi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" @onclick="() => EditCompany(company.CompanyId)">
+                                    <i class="oi oi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCompany(company.CompanyId)">
+                                    <i class="oi oi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong>Address:</strong> @company.Address
+                            </div>
+                            <div class="mb-2">
+                                <strong>Primary Contact:</strong> @company.ContactOne
+                            </div>
+                            @if (!string.IsNullOrEmpty(company.ContactTwo))
+                            {
+                                <div class="mb-2">
+                                    <strong>Secondary Contact:</strong> @company.ContactTwo
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(company.Email))
+                            {
+                                <div class="mb-2">
+                                    <strong>Email:</strong> @company.Email
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Company ID: @company.CompanyId</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h4>No Companies Found</h4>
+                    <p>There are no companies to display. Create your first company to get started.</p>
+                    <button class="btn btn-primary" @onclick="CreateNewCompany">Create New Company</button>
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+}
+
+@code {
+    private List<Company>? companies;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompanies();
+    }
+
+    private async Task LoadCompanies()
+    {
+        isLoading = true;
+        StateHasChanged();
+        
+        try
+        {
+            companies = (await CompanyService.GetCompaniesAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading companies: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CreateNewCompany()
+    {
+        Navigation.NavigateTo("/companies/create");
+    }
+
+    private void ViewCompany(long id)
+    {
+        Navigation.NavigateTo($"/companies/{id}");
+    }
+
+    private void EditCompany(long id)
+    {
+        Navigation.NavigateTo($"/companies/{id}/edit");
+    }
+
+    private async Task DeleteCompany(long id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this company? This action cannot be undone." }))
+        {
+            var success = await CompanyService.DeleteCompanyAsync(id);
+            if (success)
+            {
+                await LoadCompanies();
+            }
+        }
+    }
+}
+
+<style>
+    .unauthorized {
+        text-align: center;
+        padding: 50px 20px;
+        max-width: 400px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .unauthorized h2 {
+        color: #c33;
+        margin-bottom: 15px;
+    }
+
+    .unauthorized p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    .btn-primary {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+</style>

@@ -1,0 +1,12 @@
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/bin/Debug/net8.0/PcHouseStore.Domain.deps.json
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/bin/Debug/net8.0/PcHouseStore.Domain.dll
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/bin/Debug/net8.0/PcHouseStore.Domain.pdb
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.AssemblyInfoInputs.cache
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.AssemblyInfo.cs
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.csproj.CoreCompileInputs.cache
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.sourcelink.json
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.dll
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/refint/PcHouseStore.Domain.dll
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/PcHouseStore.Domain.pdb
+/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/Debug/net8.0/ref/PcHouseStore.Domain.dll

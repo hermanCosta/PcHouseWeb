@@ -1,0 +1,178 @@
+@page "/companies/create"
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Services
+@inject CompanyService CompanyService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create New Company</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Create New Company</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/companies">Companies</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Company Information</h5>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="company" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Company Name *</label>
+                            <input type="text" class="form-control" @bind="company.Name" placeholder="Enter company name" required />
+                            <ValidationMessage For="@(() => company.Name)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Address *</label>
+                            <textarea class="form-control" @bind="company.Address" rows="3" placeholder="Enter company address" required></textarea>
+                            <ValidationMessage For="@(() => company.Address)" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Primary Contact *</label>
+                                    <input type="tel" class="form-control" @bind="company.ContactOne" placeholder="Enter primary contact number" required />
+                                    <ValidationMessage For="@(() => company.ContactOne)" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Secondary Contact</label>
+                                    <input type="tel" class="form-control" @bind="company.ContactTwo" placeholder="Enter secondary contact number" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" @bind="company.Email" placeholder="Enter company email address" />
+                            <ValidationMessage For="@(() => company.Email)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password *</label>
+                            <input type="password" class="form-control" @bind="company.Password" placeholder="Enter company password" required />
+                            <ValidationMessage For="@(() => company.Password)" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                                <i class="oi oi-x"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                <i class="oi oi-check"></i> Create Company
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Company Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Name:</strong> @company.Name
+                    </div>
+                    <div class="mb-2">
+                        <strong>Address:</strong> @company.Address
+                    </div>
+                    <div class="mb-2">
+                        <strong>Primary Contact:</strong> @company.ContactOne
+                    </div>
+                    <div class="mb-2">
+                        <strong>Secondary Contact:</strong> @(company.ContactTwo ?? "N/A")
+                    </div>
+                    <div class="mb-2">
+                        <strong>Email:</strong> @(company.Email ?? "N/A")
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6>Multi-Tenant Features</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li>✅ Company-scoped data isolation</li>
+                        <li>✅ Independent customer management</li>
+                        <li>✅ Separate inventory tracking</li>
+                        <li>✅ Isolated sales and service orders</li>
+                        <li>✅ Company-specific reporting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Company company = new()
+    {
+        Name = "",
+        Address = "",
+        ContactOne = "",
+        ContactTwo = "",
+        Email = "",
+        Password = ""
+    };
+
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            var createdCompany = await CompanyService.CreateCompanyAsync(company);
+            if (createdCompany != null)
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Company created successfully!");
+                Navigation.NavigateTo("/companies");
+            }
+            else
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Failed to create company. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeAsync<object>("alert", $"Error creating company: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/companies");
+    }
+}
