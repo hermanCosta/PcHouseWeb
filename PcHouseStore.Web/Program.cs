@@ -20,7 +20,7 @@ builder.Services.AddHttpClient<ApiService>(client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 builder.Services.AddScoped<ApiService>();
-builder.Services.AddScoped<SaleService>();
+builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ServiceOrderService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CustomerService>();
@@ -61,15 +61,27 @@ using (var scope = app.Services.CreateScope())
     // Add test company if none exists
     if (!context.Companies.Any())
     {
+        var address = new PcHouseStore.Domain.Models.Address
+        {
+            Line1 = "123 Main Street",
+            City = "Dublin",
+            County = "Dublin",
+            CountryIso2 = "IE"
+        };
+
+        context.Addresses.Add(address);
+        context.SaveChanges();
+
         var testCompany = new PcHouseStore.Domain.Models.Company
         {
-            Name = "Test Company",
-            Address = "123 Main Street, City, State 12345",
-            ContactOne = "555-0123",
+            LegalName = "Test Company Ltd",
+            TradingName = "Test Company",
+            PhonePrimary = "555-0123",
             Email = "test@company.com",
-            Password = "password123" // In production, this should be hashed
+            BillingAddressId = address.AddressId,
+            ShippingAddressId = address.AddressId
         };
-        
+
         context.Companies.Add(testCompany);
         context.SaveChanges();
     }

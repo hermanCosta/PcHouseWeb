@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using PcHouseStore.Web.Services
 @inject CompanyContext CompanyContext
 @inject NavigationManager Navigation
@@ -9,7 +9,7 @@
 {
     <div class="welcome-container">
         <h1>Welcome to PcHouse Store</h1>
-        <p>You are logged in as: <strong>@CompanyContext.CurrentCompany?.Name</strong></p>
+        <p>You are logged in as: <strong>@GetCompanyDisplayName()</strong></p>
         <button class="btn-dashboard" @onclick="@(() => Navigation.NavigateTo("/dashboard"))">
             Go to Dashboard
         </button>
@@ -67,3 +67,17 @@ else
         box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
     }
 </style>
+
+@code {
+    private string GetCompanyDisplayName()
+    {
+        if (CompanyContext.CurrentCompany is null)
+        {
+            return string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(CompanyContext.CurrentCompany.TradingName)
+            ? CompanyContext.CurrentCompany.LegalName
+            : CompanyContext.CurrentCompany.TradingName!;
+    }
+}

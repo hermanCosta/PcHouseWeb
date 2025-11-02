@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using PcHouseStore.API.Models;
+using PcHouseStore.Domain.Enums;
 using PcHouseStore.Domain.Models;
 using PcHouseStore.Infrastructure.Repositories;
 
@@ -16,27 +18,27 @@ public class ServiceOrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ServiceOrder>>> GetServiceOrders([FromQuery] long companyId)
+    public async Task<ActionResult<IEnumerable<OrderResponse>>> GetServiceOrders([FromQuery] long companyId, [FromQuery] OrderStatus? status)
     {
         if (companyId <= 0)
             return BadRequest("Company ID is required");
 
-        var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByCompanyAsync(companyId);
-        return Ok(serviceOrders);
+        var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByCompanyAsync(companyId, status);
+        return Ok(serviceOrders.Select(so => OrderMapper.ToResponse(so)));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ServiceOrder>> GetServiceOrder(long id)
+    public async Task<ActionResult<OrderResponse>> GetServiceOrder(long id)
     {
         var serviceOrder = await _serviceOrderRepository.GetServiceOrderWithDetailsAsync(id);
         if (serviceOrder == null)
             return NotFound();
 
-        return Ok(serviceOrder);
+        return Ok(OrderMapper.ToResponse(serviceOrder, includeDetails: true));
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<ServiceOrder>>> SearchServiceOrders([FromQuery] long companyId, [FromQuery] string searchTerm)
+    public async Task<ActionResult<IEnumerable<OrderResponse>>> SearchServiceOrders([FromQuery] long companyId, [FromQuery] string searchTerm)
     {
         if (companyId <= 0)
             return BadRequest("Company ID is required");
@@ -45,56 +47,55 @@ public class ServiceOrdersController : ControllerBase
             return BadRequest("Search term is required");
 
         var serviceOrders = await _serviceOrderRepository.SearchServiceOrdersAsync(companyId, searchTerm);
-        return Ok(serviceOrders);
+        return Ok(serviceOrders.Select(so => OrderMapper.ToResponse(so)));
     }
 
     [HttpGet("customer/{customerId}")]
-    public async Task<ActionResult<IEnumerable<ServiceOrder>>> GetServiceOrdersByCustomer(long customerId)
+    public async Task<ActionResult<IEnumerable<OrderResponse>>> GetServiceOrdersByCustomer(long customerId)
     {
         if (customerId <= 0)
             return BadRequest("Customer ID is required");
 
         var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByCustomerAsync(customerId);
-        return Ok(serviceOrders);
+        return Ok(serviceOrders.Select(so => OrderMapper.ToResponse(so)));
     }
 
-    [HttpGet("employee/{employeeId}")]
-    public async Task<ActionResult<IEnumerable<ServiceOrder>>> GetServiceOrdersByEmployee(long employeeId)
+    [HttpGet("technician/{technicianId}")]
+    public async Task<ActionResult<IEnumerable<OrderResponse>>> GetServiceOrdersByTechnician(long technicianId)
     {
-        if (employeeId <= 0)
-            return BadRequest("Employee ID is required");
+        if (technicianId <= 0)
+            return BadRequest("Technician ID is required");
 
-        var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByEmployeeAsync(employeeId);
-        return Ok(serviceOrders);
-    }
-
-    [HttpGet("status/{status}")]
-    public async Task<ActionResult<IEnumerable<ServiceOrder>>> GetServiceOrdersByStatus([FromQuery] long companyId, [FromRoute] Domain.Enums.OrderStatus status)
-    {
-        if (companyId <= 0)
-            return BadRequest("Company ID is required");
-
-        var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByStatusAsync(companyId, status);
-        return Ok(serviceOrders);
-    }
-
-    [HttpGet("last-order-id")]
-    public async Task<ActionResult<long>> GetLastOrderId()
-    {
-        var lastOrderId = await _serviceOrderRepository.GetLastOrderIdAsync();
-        return Ok(lastOrderId);
+        var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByTechnicianAsync(technicianId);
+        return Ok(serviceOrders.Select(so => OrderMapper.ToResponse(so)));
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceOrder>> CreateServiceOrder([FromBody] ServiceOrder serviceOrder)
+    public async Task<ActionResult<OrderResponse>> CreateServiceOrder([FromBody] CreateOrderRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        if (!string.Equals(request.OrderType, OrderType.Service.ToString(), StringComparison.OrdinalIgnoreCase))
+            return BadRequest("OrderType must be 'Service' for service orders.");
+
+        Order order;
+        try
+        {
+            order = OrderFactory.CreateOrder(request);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        if (order is not ServiceOrder serviceOrder)
+            return BadRequest("Invalid payload for service order creation.");
+
         try
         {
             var createdServiceOrder = await _serviceOrderRepository.AddAsync(serviceOrder);
-            return CreatedAtAction(nameof(GetServiceOrder), new { id = createdServiceOrder.ServiceOrderId }, createdServiceOrder);
+            return CreatedAtAction(nameof(GetServiceOrder), new { id = createdServiceOrder.OrderId }, OrderMapper.ToResponse(createdServiceOrder, includeDetails: true));
         }
         catch (Exception ex)
         {
@@ -103,17 +104,29 @@ public class ServiceOrdersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateServiceOrder(long id, [FromBody] ServiceOrder serviceOrder)
+    public async Task<IActionResult> UpdateServiceOrder(long id, [FromBody] UpdateOrderRequest request)
     {
-        if (id != serviceOrder.ServiceOrderId)
-            return BadRequest("ID mismatch");
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        var existing = await _serviceOrderRepository.GetServiceOrderWithDetailsAsync(id);
+        if (existing is null)
+            return NotFound();
+
+        if (request.Status.HasValue)
+            existing.Status = request.Status.Value;
+
+        if (!string.IsNullOrWhiteSpace(request.Notes))
+            existing.Notes = request.Notes;
+
+        if (request.BalanceDue.HasValue)
+            existing.BalanceDue = request.BalanceDue.Value;
+
+        existing.ClosedAt = request.ClosedAt ?? existing.ClosedAt;
+
         try
         {
-            await _serviceOrderRepository.UpdateAsync(serviceOrder);
+            await _serviceOrderRepository.UpdateAsync(existing);
             return NoContent();
         }
         catch (Exception ex)

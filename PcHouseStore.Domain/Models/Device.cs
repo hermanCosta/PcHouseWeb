@@ -1,33 +1,39 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
-namespace PcHouseStore.Domain.Models
+namespace PcHouseStore.Domain.Models;
+
+[Table("device")]
+public class Device
 {
-    [Table("DEVICE")]
-    public class Device
-    {
-        [Key]
-        [Column("ID_DEVICE")]
-        public long DeviceId { get; set; }
+    [Key]
+    [Column("device_id")]
+    public long DeviceId { get; set; }
 
-        [Required]
-        [Column("BRAND")]
-        [MaxLength(100)]
-        public string Brand { get; set; } = string.Empty;
+    [Required]
+    [Column("customer_id")]
+    public long CustomerId { get; set; }
 
-        [Required]
-        [Column("MODEL")]
-        [MaxLength(100)]
-        public string Model { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(100)]
+    [Column("brand")]
+    public string Brand { get; set; } = string.Empty;
 
-        [Required]
-        [Column("SERIAL_NUMBER")]
-        [MaxLength(100)]
-        public string SerialNumber { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(100)]
+    [Column("model")]
+    public string Model { get; set; } = string.Empty;
 
-        public string DisplayName => $"{Brand} {Model}".Trim();
+    [MaxLength(100)]
+    [Column("serial_number")]
+    public string? SerialNumber { get; set; }
 
-        // Navigation properties
-        public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
-    }
+    [Column("description")]
+    public string? Description { get; set; }
+
+    public Customer Customer { get; set; } = null!;
+    public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
+
+    public string DisplayName => string.Join(" ", new[] { Brand, Model }.Where(s => !string.IsNullOrWhiteSpace(s)));
 }
