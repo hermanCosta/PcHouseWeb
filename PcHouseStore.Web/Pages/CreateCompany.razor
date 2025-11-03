@@ -153,6 +153,12 @@
 
         try
         {
+            if (string.IsNullOrWhiteSpace(company.Password))
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Password is required.");
+                return;
+            }
+
             var request = new CreateCompanyRequest(
                 company.LegalName ?? "",
                 company.TradingName,
@@ -163,7 +169,8 @@
                 company.PhoneSecondary,
                 company.Website,
                 null, // BillingAddressId - would need address creation service
-                null  // ShippingAddressId - would need address creation service
+                null, // ShippingAddressId - would need address creation service
+                company.Password ?? ""
             );
 
             var createdCompany = await CompanyService.CreateCompanyAsync(request);

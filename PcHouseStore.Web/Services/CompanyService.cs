@@ -35,4 +35,10 @@ public class CompanyService
     {
         return await _apiService.DeleteAsync($"api/companies/{id}");
     }
+
+    public async Task<CompanyResponse?> LoginAsync(string tradingName, string password)
+    {
+        var loginRequest = new { TradingName = tradingName, Password = password };
+        return await _apiService.PostAsync<object, CompanyResponse>("api/auth/login", loginRequest);
+    }
 }

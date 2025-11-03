@@ -11,6 +11,18 @@ public class ApiService
     public ApiService(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        
+        // Log BaseAddress for debugging
+        Console.WriteLine($"ApiService Constructor - BaseAddress: {_httpClient.BaseAddress?.ToString() ?? "NULL"}");
+        
+        // If BaseAddress is null, set it manually
+        if (_httpClient.BaseAddress == null)
+        {
+            var baseUrl = "https://localhost:7061/";
+            _httpClient.BaseAddress = new Uri(baseUrl);
+            Console.WriteLine($"ApiService: BaseAddress was null, manually set to: {baseUrl}");
+        }
+        
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -105,20 +117,50 @@ public class ApiService
     {
         try
         {
+            // Ensure BaseAddress is set
+            if (_httpClient.BaseAddress == null)
+            {
+                throw new InvalidOperationException("HttpClient BaseAddress is not set. Check Program.cs HttpClient configuration.");
+            }
+            
+            // Remove leading slash from endpoint if BaseAddress ends with /
+            if (endpoint.StartsWith("/"))
+            {
+                endpoint = endpoint.Substring(1);
+            }
+            
+            // Build full URL for debugging
+            var fullUrl = new Uri(_httpClient.BaseAddress, endpoint).ToString();
+            
+            Console.WriteLine($"PostAsync - BaseAddress: {_httpClient.BaseAddress}");
+            Console.WriteLine($"PostAsync - Endpoint: {endpoint}");
+            Console.WriteLine($"PostAsync - Full URL: {fullUrl}");
+
             var json = JsonSerializer.Serialize(data, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(endpoint, content);
+            
             if (response.IsSuccessStatusCode)
             {
                 var responseJson = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<TResponse>(responseJson, _jsonOptions);
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"PostAsync Error - Status: {response.StatusCode}, Content: {errorContent}");
             }
             return default;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in PostAsync: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+            }
             return default;
         }
     }

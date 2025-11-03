@@ -28,6 +28,7 @@ CREATE TABLE company (
   website              VARCHAR(255),
   billing_address_id   BIGINT,
   shipping_address_id  BIGINT,
+  password_hash        VARCHAR(255) NOT NULL,
   created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_company_billing_addr  FOREIGN KEY (billing_address_id)  REFERENCES address(address_id) ON DELETE SET NULL,
   CONSTRAINT fk_company_shipping_addr FOREIGN KEY (shipping_address_id) REFERENCES address(address_id) ON DELETE SET NULL

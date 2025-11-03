@@ -21,20 +21,11 @@ public class AuthenticationService
     {
         try
         {
-            var companies = await _companyService.GetCompaniesAsync();
-            if (companies == null) return false;
-
-            var company = companies.FirstOrDefault(c => 
-                c.Name.Equals(companyName, StringComparison.OrdinalIgnoreCase));
-
+            var loginRequest = new { TradingName = companyName, Password = password };
+            var company = await _companyService.LoginAsync(companyName, password);
+            
             if (company == null) return false;
 
-            // TODO: Implement proper authentication via API endpoint
-            // For now, password validation should be done on the API side
-            // This is a temporary solution - in production, create a login API endpoint
-            // that validates credentials and returns authentication tokens
-            // Since CompanyResponse doesn't contain password, we'll accept any match by name
-            // This should be replaced with proper API-based authentication
             _currentCompany = company;
             return true;
         }

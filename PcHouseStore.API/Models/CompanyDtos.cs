@@ -30,7 +30,8 @@ public record CreateCompanyRequest(
     string? PhoneSecondary,
     string? Website,
     long? BillingAddressId,
-    long? ShippingAddressId);
+    long? ShippingAddressId,
+    string Password);
 
 public record UpdateCompanyRequest(
     string LegalName,

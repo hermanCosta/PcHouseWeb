@@ -4,6 +4,8 @@ using PcHouseStore.API.Models;
 using PcHouseStore.Domain.Models;
 using PcHouseStore.Infrastructure.Data;
 using PcHouseStore.Infrastructure.Repositories;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace PcHouseStore.API.Controllers;
 
@@ -65,6 +67,7 @@ public class CompaniesController : ControllerBase
                 Website = request.Website,
                 BillingAddressId = request.BillingAddressId,
                 ShippingAddressId = request.ShippingAddressId,
+                PasswordHash = HashPassword(request.Password),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -135,6 +138,20 @@ public class CompaniesController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred while deleting the company: {ex.Message}");
+        }
+    }
+
+    private static string HashPassword(string password)
+    {
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
         }
     }
 }

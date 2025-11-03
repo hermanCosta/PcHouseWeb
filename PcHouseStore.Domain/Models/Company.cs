@@ -53,6 +53,11 @@ public class Company
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [Required]
+    [MaxLength(255)]
+    [Column("password_hash")]
+    public string PasswordHash { get; set; } = string.Empty;
+
     public Address? BillingAddress { get; set; }
     public Address? ShippingAddress { get; set; }
 
@@ -104,6 +109,4 @@ public class Company
         set { /* compatibility shim - ignored */ }
     }
 
-    [NotMapped]
-    public string? Password { get; set; }
 }

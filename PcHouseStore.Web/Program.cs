@@ -13,13 +13,18 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
 // Add HTTP client and services
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7061";
+if (!apiBaseUrl.EndsWith("/"))
+{
+    apiBaseUrl += "/";
+}
+
 builder.Services.AddHttpClient<ApiService>(client =>
 {
-    var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7061";
-    client.BaseAddress = new Uri(apiBaseUrl + "/");
+    client.BaseAddress = new Uri(apiBaseUrl);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
+    Console.WriteLine($"HttpClient BaseAddress configured in AddHttpClient: {client.BaseAddress}");
 });
-builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ServiceOrderService>();
 builder.Services.AddScoped<ProductService>();
