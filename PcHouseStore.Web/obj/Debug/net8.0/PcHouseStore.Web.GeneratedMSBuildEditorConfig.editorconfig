@@ -9,103 +9,111 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = PcHouseStore.Web
 build_property.RootNamespace = PcHouseStore.Web
-build_property.ProjectDir = /Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/
+build_property.ProjectDir = /Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web
+build_property.MSBuildProjectDirectory = /Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web
 build_property._RazorSourceGeneratorDebug = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/App.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Companies.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Companies.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ29tcGFuaWVzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Counter.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ291bnRlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateCompany.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateCompany.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlQ29tcGFueS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateCustomer.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateCustomer.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlQ3VzdG9tZXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateProduct.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateProduct.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlUHJvZHVjdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateSale.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateSale.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlU2FsZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateServiceOrder.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/CreateServiceOrder.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlU2VydmljZU9yZGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Customers.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Customers.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3VzdG9tZXJzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Dashboard.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Dashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRGFzaGJvYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/FetchData.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/FetchData.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRmV0Y2hEYXRhLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Index.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSW5kZXgucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Login.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Products.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Products.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvUHJvZHVjdHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Sales.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/SaleDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2FsZURldGFpbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Sales.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2FsZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/ServiceOrders.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/ServiceOrderDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2VydmljZU9yZGVyRGV0YWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/ServiceOrders.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2VydmljZU9yZGVycy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Shared/SurveyPrompt.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Shared/SurveyPrompt.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkL1N1cnZleVByb21wdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/_Imports.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Shared/MainLayout.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Shared/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkL01haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-xltu8zmbvs
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Shared/NavMenu.razor]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Shared/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkL05hdk1lbnUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-n8gqzxm20e
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/Error.cshtml]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/_Host.cshtml]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/_Host.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvX0hvc3QuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/Pages/_Layout.cshtml]
+[/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/Pages/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvX0xheW91dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

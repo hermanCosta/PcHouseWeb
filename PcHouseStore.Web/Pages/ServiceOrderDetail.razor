@@ -1,0 +1,862 @@
+@page "/service-orders/{id:long}"
+@using PcHouseStore.Domain.Enums
+@using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Models
+@using PcHouseStore.Web.Services
+@inject ServiceOrderService ServiceOrderService
+@inject PaymentService PaymentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Service Order @order?.OrderNumber</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (order == null)
+{
+    <div class="container-fluid">
+        <div class="alert alert-warning">
+            <h4>Service order not found</h4>
+            <p>The service order you're looking for does not exist.</p>
+            <button class="btn btn-primary" @onclick="NavigateBack">
+                <i class="oi oi-arrow-left"></i> Back to Service Orders
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2>Service Order: @order.OrderNumber</h2>
+                        <span class="badge @GetStatusBadgeClass(order.Status) fs-6">@order.Status</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" @onclick="PrintReceipt">
+                            <i class="oi oi-print"></i> Print Receipt
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+                            <i class="oi oi-arrow-left"></i> Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-success" @onclick="() => ChangeStatus(OrderStatus.Completed)" 
+                                disabled="@(!CanChangeToStatus(OrderStatus.Completed))">
+                                <i class="oi oi-check"></i> Mark as Fixed
+                            </button>
+                            <button class="btn btn-warning" @onclick="() => ChangeStatus(OrderStatus.Cancelled)" 
+                                disabled="@(!CanChangeToStatus(OrderStatus.Cancelled))">
+                                <i class="oi oi-x"></i> Not Fixable / Cancel
+                            </button>
+                            <button class="btn btn-info" @onclick="() => ChangeStatus(OrderStatus.InProgress)" 
+                                disabled="@(!CanChangeToStatus(OrderStatus.InProgress))">
+                                <i class="oi oi-cog"></i> Set In Progress
+                            </button>
+                            <button class="btn btn-primary" @onclick="() => ChangeStatus(OrderStatus.Ready)" 
+                                disabled="@(!CanChangeToStatus(OrderStatus.Ready))">
+                                <i class="oi oi-check-circle"></i> Mark as Ready
+                            </button>
+                            <button class="btn btn-outline-primary" @onclick="ShowUpdateModal">
+                                <i class="oi oi-pencil"></i> Update Order
+                            </button>
+                            <button class="btn btn-outline-info" @onclick="ShowDepositsModal">
+                                <i class="oi oi-dollar"></i> View Deposits (@GetTotalDeposits().ToString("F2"))
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="ShowOrderHistoryModal">
+                                <i class="oi oi-list"></i> Order History
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="ShowAddNoteModal">
+                                <i class="oi oi-plus"></i> Add Note
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="ShowPaymentsModal">
+                                <i class="oi oi-credit-card"></i> View Payments
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Customer & Device Info -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="oi oi-person"></i> Customer & Device Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    <dt class="col-5">Customer:</dt>
+                                    <dd class="col-7"><strong>@order.CustomerName</strong></dd>
+                                    <dt class="col-5">Device:</dt>
+                                    <dd class="col-7">@order.ServiceDetails?.DeviceBrand @order.ServiceDetails?.DeviceModel</dd>
+                                    <dt class="col-5">Serial Number:</dt>
+                                    <dd class="col-7">@(order.ServiceDetails?.DeviceSerial ?? "N/A")</dd>
+                                    <dt class="col-5">Technician:</dt>
+                                    <dd class="col-7">@(order.ServiceDetails?.TechnicianName ?? "Unassigned")</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    <dt class="col-5">Order Date:</dt>
+                                    <dd class="col-7">@order.PlacedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+                                    <dt class="col-5">Estimated Completion:</dt>
+                                    <dd class="col-7">@(order.ServiceDetails?.EstimatedCompletion?.ToLocalTime().ToString("dd MMM yyyy") ?? "Not set")</dd>
+                                    <dt class="col-5">Completed At:</dt>
+                                    <dd class="col-7">@(order.ServiceDetails?.CompletedAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "Not completed")</dd>
+                                    <dt class="col-5">Warranty:</dt>
+                                    <dd class="col-7">@(order.ServiceDetails?.WarrantyDays ?? 0) days</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(order.ServiceDetails?.CheckInNotes))
+                        {
+                            <hr />
+                            <div>
+                                <strong>Check-in Notes:</strong>
+                                <p class="mb-0">@order.ServiceDetails.CheckInNotes</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Faults -->
+                @if (order?.ServiceDetails?.CheckInNotes != null && !string.IsNullOrWhiteSpace(order.ServiceDetails.CheckInNotes))
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="oi oi-warning"></i> Reported Issues</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">@order.ServiceDetails.CheckInNotes</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Service Lines -->
+                @if (order.Lines != null && order.Lines.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="oi oi-list"></i> Services / Repairs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="text-end">Qty</th>
+                                            <th class="text-end">Unit Price</th>
+                                            <th class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var line in order.Lines)
+                                        {
+                                            <tr>
+                                                <td>@line.Description</td>
+                                                <td class="text-end">@line.Quantity</td>
+                                                <td class="text-end">€@line.UnitPrice.ToString("F2")</td>
+                                                <td class="text-end"><strong>€@line.LineTotal.ToString("F2")</strong></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-secondary">
+                                            <th colspan="3">Total:</th>
+                                            <th class="text-end">€@order.TotalAmount.ToString("F2")</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Notes History -->
+                @if (order.NotesHistory != null && order.NotesHistory.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="oi oi-comment-square"></i> Notes History</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                @foreach (var note in order.NotesHistory.OrderByDescending(n => n.CreatedAt))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <strong>@note.EmployeeName</strong>
+                                            <small class="text-muted">@note.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                                        </div>
+                                        <p class="mb-0">@note.Note</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Column - Summary -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="oi oi-info"></i> Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-6">Order Number:</dt>
+                            <dd class="col-6"><strong>@order.OrderNumber</strong></dd>
+                            
+                            <dt class="col-6">Status:</dt>
+                            <dd class="col-6">
+                                <span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span>
+                            </dd>
+                            
+                            <dt class="col-6">Total Amount:</dt>
+                            <dd class="col-6">€@order.TotalAmount.ToString("F2")</dd>
+                            
+                            <dt class="col-6">Total VAT:</dt>
+                            <dd class="col-6">€@order.TotalVatAmount.ToString("F2")</dd>
+                            
+                            <dt class="col-6">Total Paid:</dt>
+                            <dd class="col-6 text-success">
+                                <strong>€@GetTotalPaid().ToString("F2")</strong>
+                            </dd>
+                            
+                            <dt class="col-6">Balance Due:</dt>
+                            <dd class="col-6">
+                                <strong class="@(order.BalanceDue > 0 ? "text-danger" : "text-success")">
+                                    €@order.BalanceDue.ToString("F2")
+                                </strong>
+                            </dd>
+                        </dl>
+
+                        <hr />
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" @onclick="PrintReceipt">
+                                <i class="oi oi-print"></i> Print Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Status Change Confirmation Modal -->
+@if (showStatusChangeModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Order Status</h5>
+                    <button type="button" class="btn-close" @onclick="CloseStatusChangeModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Change order status to <strong>@pendingStatusChange</strong>?</p>
+                    <div class="mb-3">
+                        <label class="form-label">Comment (optional):</label>
+                        <textarea class="form-control" rows="3" @bind="statusChangeComment" 
+                            placeholder="Add a comment about this status change..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseStatusChangeModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="ConfirmStatusChange" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        }
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Deposits Modal -->
+@if (showDepositsModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Deposits Paid</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDepositsModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (deposits == null || !deposits.Any())
+                    {
+                        <p class="text-muted">No deposits have been paid for this order.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Payment Method</th>
+                                        <th>Processed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var deposit in deposits)
+                                    {
+                                        <tr>
+                                            <td>@deposit.ProcessedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                            <td><strong>€@deposit.Amount.ToString("F2")</strong></td>
+                                            <td>@deposit.PaymentMethod?.MethodCode</td>
+                                            <td>@(deposit.Employee?.Person?.DisplayName ?? "N/A")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <th>Total Deposits:</th>
+                                        <th colspan="3" class="text-end">€@GetTotalDeposits().ToString("F2")</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDepositsModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Order History Modal -->
+@if (showOrderHistoryModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order History</h5>
+                    <button type="button" class="btn-close" @onclick="CloseOrderHistoryModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (order?.StatusHistory == null || !order.StatusHistory.Any())
+                    {
+                        <p class="text-muted">No status history available for this order.</p>
+                    }
+                    else
+                    {
+                        <div class="timeline">
+                            @foreach (var statusEvent in order.StatusHistory.OrderByDescending(s => s.ChangedAt))
+                            {
+                                <div class="timeline-item mb-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge @GetStatusBadgeClass(statusEvent.Status)">@statusEvent.Status</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-bold">@statusEvent.EmployeeName</div>
+                                            <small class="text-muted">@statusEvent.ChangedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                                            @if (!string.IsNullOrWhiteSpace(statusEvent.Comment))
+                                            {
+                                                <div class="mt-1">@statusEvent.Comment</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseOrderHistoryModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Add Note Modal -->
+@if (showAddNoteModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Note to Order</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAddNoteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Note *</label>
+                        <textarea class="form-control" rows="5" @bind="newNote" 
+                            placeholder="Enter your note about this order..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseAddNoteModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveNote" disabled="@(string.IsNullOrWhiteSpace(newNote) || isSaving)">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        }
+                        Save Note
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Payments Modal -->
+@if (showPaymentsModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">All Payments</h5>
+                    <button type="button" class="btn-close" @onclick="ClosePaymentsModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (allPayments == null || !allPayments.Any())
+                    {
+                        <p class="text-muted">No payments have been made for this order.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Payment Method</th>
+                                        <th>Processed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in allPayments.OrderByDescending(p => p.ProcessedAt))
+                                    {
+                                        <tr>
+                                            <td>@payment.ProcessedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                            <td><span class="badge bg-info">@payment.PaymentType</span></td>
+                                            <td><strong>€@payment.Amount.ToString("F2")</strong></td>
+                                            <td>@payment.PaymentMethod?.MethodCode</td>
+                                            <td>@(payment.Employee?.Person?.DisplayName ?? "N/A")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <th>Total Paid:</th>
+                                        <th colspan="4" class="text-end">€@GetTotalPaid().ToString("F2")</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="ClosePaymentsModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Update Order Modal -->
+@if (showUpdateModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Service Order</h5>
+                    <button type="button" class="btn-close" @onclick="CloseUpdateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="updateRequest" OnValidSubmit="SaveOrderUpdate">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Internal Notes</label>
+                            <textarea class="form-control" rows="4" @bind="updateRequest.Notes" 
+                                placeholder="Update internal notes..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Balance Due</label>
+                            <InputNumber class="form-control" @bind-Value="updateRequest.BalanceDue" step="0.01" min="0" />
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseUpdateModal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                @if (isSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                Save Changes
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+    
+    private OrderResponse? order;
+    private List<Payment>? deposits;
+    private List<Payment>? allPayments;
+    
+    private bool isLoading = true;
+    private bool isSaving = false;
+
+    // Modals
+    private bool showStatusChangeModal;
+    private bool showDepositsModal;
+    private bool showOrderHistoryModal;
+    private bool showAddNoteModal;
+    private bool showPaymentsModal;
+    private bool showUpdateModal;
+
+    // Status change
+    private OrderStatus? pendingStatusChange;
+    private string statusChangeComment = string.Empty;
+
+    // Note
+    private string newNote = string.Empty;
+
+    // Update
+    private UpdateOrderRequest updateRequest = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrderDataAsync();
+    }
+
+    private async Task LoadOrderDataAsync()
+    {
+        isLoading = true;
+        try
+        {
+            await Task.WhenAll(
+                LoadOrderAsync(),
+                LoadDepositsAsync(),
+                LoadAllPaymentsAsync()
+            );
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadOrderAsync()
+    {
+        try
+        {
+            order = await ServiceOrderService.GetServiceOrderAsync(Id);
+            if (order != null)
+            {
+                updateRequest = new UpdateOrderRequest
+                {
+                    Status = null,
+                    Notes = order.Notes,
+                    BalanceDue = order.BalanceDue,
+                    ClosedAt = null
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error loading order: {ex.Message}");
+        }
+    }
+
+    private async Task LoadDepositsAsync()
+    {
+        try
+        {
+            deposits = (await PaymentService.GetDepositsByOrderAsync(Id))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error loading deposits: {ex.Message}");
+        }
+    }
+
+    private async Task LoadAllPaymentsAsync()
+    {
+        try
+        {
+            allPayments = (await PaymentService.GetPaymentsByOrderAsync(Id))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error loading payments: {ex.Message}");
+        }
+    }
+
+    private decimal GetTotalDeposits()
+    {
+        return deposits?.Sum(d => d.Amount) ?? 0m;
+    }
+
+    private decimal GetTotalPaid()
+    {
+        return allPayments?.Sum(p => p.Amount) ?? 0m;
+    }
+
+    private bool CanChangeToStatus(OrderStatus newStatus)
+    {
+        if (order == null) return false;
+        
+        return newStatus switch
+        {
+            OrderStatus.Completed => order.Status != OrderStatus.Completed && order.Status != OrderStatus.Cancelled,
+            OrderStatus.Cancelled => order.Status != OrderStatus.Completed && order.Status != OrderStatus.Cancelled,
+            OrderStatus.InProgress => order.Status == OrderStatus.Created || order.Status == OrderStatus.Ready,
+            OrderStatus.Ready => order.Status == OrderStatus.InProgress || order.Status == OrderStatus.Created,
+            _ => false
+        };
+    }
+
+    private void ChangeStatus(OrderStatus newStatus)
+    {
+        pendingStatusChange = newStatus;
+        statusChangeComment = string.Empty;
+        showStatusChangeModal = true;
+    }
+
+    private void CloseStatusChangeModal()
+    {
+        showStatusChangeModal = false;
+        pendingStatusChange = null;
+        statusChangeComment = string.Empty;
+    }
+
+    private async Task ConfirmStatusChange()
+    {
+        if (!pendingStatusChange.HasValue || order == null) return;
+
+        isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var success = await ServiceOrderService.UpdateStatusAsync(Id, pendingStatusChange.Value, statusChangeComment);
+            if (success)
+            {
+                await LoadOrderDataAsync();
+                CloseStatusChangeModal();
+                await JSRuntime.InvokeVoidAsync("alert", "Order status updated successfully!");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to update order status.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error updating status: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    // Deposit Modal
+    private async Task ShowDepositsModal()
+    {
+        await LoadDepositsAsync();
+        showDepositsModal = true;
+    }
+
+    private void CloseDepositsModal()
+    {
+        showDepositsModal = false;
+    }
+
+    // Order History Modal
+    private void ShowOrderHistoryModal()
+    {
+        showOrderHistoryModal = true;
+    }
+
+    private void CloseOrderHistoryModal()
+    {
+        showOrderHistoryModal = false;
+    }
+
+    // Add Note Modal
+    private void ShowAddNoteModal()
+    {
+        newNote = string.Empty;
+        showAddNoteModal = true;
+    }
+
+    private void CloseAddNoteModal()
+    {
+        showAddNoteModal = false;
+        newNote = string.Empty;
+    }
+
+    private async Task SaveNote()
+    {
+        if (string.IsNullOrWhiteSpace(newNote)) return;
+
+        isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var success = await ServiceOrderService.AddNoteAsync(Id, newNote);
+            if (success)
+            {
+                await LoadOrderDataAsync();
+                CloseAddNoteModal();
+                await JSRuntime.InvokeVoidAsync("alert", "Note added successfully!");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to add note.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error adding note: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    // Payments Modal
+    private async Task ShowPaymentsModal()
+    {
+        await LoadAllPaymentsAsync();
+        showPaymentsModal = true;
+    }
+
+    private void ClosePaymentsModal()
+    {
+        showPaymentsModal = false;
+    }
+
+    // Update Modal
+    private void ShowUpdateModal()
+    {
+        if (order != null)
+        {
+            updateRequest = new UpdateOrderRequest
+            {
+                Status = null,
+                Notes = order.Notes,
+                BalanceDue = order.BalanceDue,
+                ClosedAt = null
+            };
+        }
+        showUpdateModal = true;
+    }
+
+    private void CloseUpdateModal()
+    {
+        showUpdateModal = false;
+    }
+
+    private async Task SaveOrderUpdate()
+    {
+        isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var success = await ServiceOrderService.UpdateServiceOrderAsync(Id, updateRequest);
+            if (success)
+            {
+                await LoadOrderDataAsync();
+                CloseUpdateModal();
+                await JSRuntime.InvokeVoidAsync("alert", "Order updated successfully!");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to update order.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error updating order: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    // Payment Modal (to be implemented - placeholder)
+    // private void ShowPaymentModal()
+    // {
+    //     // TODO: Implement payment modal
+    //     JSRuntime.InvokeVoidAsync("alert", "Payment recording feature will be implemented.");
+    // }
+
+    private void PrintReceipt()
+    {
+        // TODO: Implement print functionality
+        JSRuntime.InvokeVoidAsync("window.print");
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/service-orders");
+    }
+
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
+    {
+        OrderStatus.Created => "bg-secondary",
+        OrderStatus.InProgress => "bg-info",
+        OrderStatus.Ready => "bg-primary",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-warning",
+        _ => "bg-secondary"
+    };
+}

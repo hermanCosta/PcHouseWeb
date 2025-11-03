@@ -1,22 +1,21 @@
 @page "/sales/create"
-@using PcHouseStore.Domain.Models
 @using PcHouseStore.Domain.Enums
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
-@using Microsoft.AspNetCore.Components.Forms
-@inject SaleService SaleService
+@inject OrderService OrderService
 @inject CustomerService CustomerService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Create New Sale</PageTitle>
+<PageTitle>Create Retail Order</PageTitle>
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h2>Create New Sale</h2>
+            <h2>Create Retail Order</h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/sales">Sales</a></li>
+                    <li class="breadcrumb-item"><a href="/sales">Retail Orders</a></li>
                     <li class="breadcrumb-item active">Create</li>
                 </ol>
             </nav>
@@ -24,47 +23,39 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-lg-7">
             <div class="card">
-                <div class="card-header">
-                    <h5>Sale Information</h5>
-                </div>
+                <div class="card-header"><h5>Order Information</h5></div>
                 <div class="card-body">
-                    <EditForm Model="sale" OnValidSubmit="@HandleValidSubmitAsync">
+                    <EditForm Model="orderModel" OnValidSubmit="HandleValidSubmitAsync">
                         <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">Customer</label>
+                            <select class="form-select" @bind="orderModel.CustomerId" required>
+                                <option value="">Select customer</option>
+                                @if (customers != null)
+                                {
+                                    foreach (var customer in customers)
+                                    {
+                                        <option value="@customer.CustomerId">@(customer.PersonName ?? "N/A")</option>
+                                    }
+                                }
+                            </select>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Customer</label>
-                                    <select class="form-select" @bind="sale.CustomerId" required>
-                                        <option value="0">Select Customer</option>
-                                        @if (customers != null)
-                                        {
-                                            @foreach (var customer in customers)
-                                            {
-                                                <option value="@customer.CustomerId">@customer.Person?.FullName</option>
-                                            }
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => sale.CustomerId)" />
+                                    <label class="form-label">Total Amount (?)</label>
+                                    <InputNumber class="form-control" @bind-Value="orderModel.TotalAmount" step="0.01" min="0" />
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Employee</label>
-                                    <select class="form-select" @bind="sale.EmployeeId" required>
-                                        <option value="0">Select Employee</option>
-                                        @if (employees != null)
-                                        {
-                                            @foreach (var employee in employees)
-                                            {
-                                                <option value="@employee.EmployeeId">@employee.Person?.FullName</option>
-                                            }
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => sale.EmployeeId)" />
+                                    <label class="form-label">VAT Amount (?)</label>
+                                    <InputNumber class="form-control" @bind-Value="orderModel.TotalVatAmount" step="0.01" min="0" />
                                 </div>
                             </div>
                         </div>
@@ -72,89 +63,65 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Total Amount</label>
-                                    <InputNumber class="form-control" @bind-Value="sale.Total" placeholder="0.00"
-                                        step="0.01" min="0" />
-                                    <ValidationMessage For="@(() => sale.Total)" />
+                                    <label class="form-label">Balance Due (?)</label>
+                                    <InputNumber class="form-control" @bind-Value="orderModel.BalanceDue" step="0.01" min="0" />
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Remaining Amount</label>
-                                    <InputNumber class="form-control" @bind-Value="sale.Remaining" placeholder="0.00"
-                                        step="0.01" min="0" />
-                                    <ValidationMessage For="@(() => sale.Remaining)" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Sale Type</label>
-                                    <select class="form-select" @bind="sale.SaleType">
-                                        <option value="@SaleType.Common">Common</option>
-                                        <option value="@SaleType.Refurb">Refurb</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select" @bind="sale.Status">
-                                        <option value="@OrderStatus.Created">Created</option>
-                                        <option value="@OrderStatus.InProgress">In Progress</option>
-                                        <option value="@OrderStatus.Finished">Finished</option>
+                                    <label class="form-label">Sales Channel</label>
+                                    <select class="form-select" @bind="orderModel.SalesChannel">
+                                        <option value="@SalesChannel.InStore">In Store</option>
+                                        <option value="@SalesChannel.Online">Online</option>
+                                        <option value="@SalesChannel.Phone">Phone</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Important Notes</label>
-                            <textarea class="form-control" @bind="sale.ImportantNotes" rows="3"
-                                placeholder="Enter any important notes about this sale..."></textarea>
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" rows="3" @bind="orderModel.Notes" placeholder="Optional"></textarea>
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-secondary" @onclick="Cancel">
-                                <i class="oi oi-x"></i> Cancel
-                            </button>
-
+                            <button type="button" class="btn btn-outline-secondary" @onclick="Cancel">Cancel</button>
                             <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
                                 @if (isSubmitting)
                                 {
                                     <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                 }
-                                <i class="oi oi-check"></i> Create Sale
+                                Create Order
                             </button>
                         </div>
                     </EditForm>
-
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-lg-5">
             <div class="card">
-                <div class="card-header">
-                    <h5>Sale Summary</h5>
-                </div>
+                <div class="card-header"><h5>Order Summary</h5></div>
                 <div class="card-body">
-                    <div class="mb-2">
-                        <strong>Total:</strong> €@sale.Total.ToString("F2")
-                    </div>
-                    <div class="mb-2">
-                        <strong>Remaining:</strong> €@sale.Remaining.ToString("F2")
-                    </div>
-                    <div class="mb-2">
-                        <strong>Type:</strong> @sale.SaleType
-                    </div>
-                    <div class="mb-2">
-                        <strong>Status:</strong> @sale.Status
-                    </div>
+                    <dl class="row mb-0">
+                        <dt class="col-5">Order Number</dt>
+                        <dd class="col-7">@orderModel.OrderNumber</dd>
+
+                        <dt class="col-5">Order Type</dt>
+                        <dd class="col-7">@orderModel.OrderType</dd>
+
+                        <dt class="col-5">Total</dt>
+                        <dd class="col-7">?@orderModel.TotalAmount.ToString("F2")</dd>
+
+                        <dt class="col-5">VAT</dt>
+                        <dd class="col-7">?@orderModel.TotalVatAmount.ToString("F2")</dd>
+
+                        <dt class="col-5">Balance Due</dt>
+                        <dd class="col-7">?@orderModel.BalanceDue.ToString("F2")</dd>
+
+                        <dt class="col-5">Placed At</dt>
+                        <dd class="col-7">@orderModel.PlacedAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+                    </dl>
                 </div>
             </div>
         </div>
@@ -162,75 +129,81 @@
 </div>
 
 @code {
-    private Sale sale = new Sale()
+    private CreateOrderRequest orderModel = new()
     {
-        CompanyId = 1, // This should come from authentication context
-        Total = 0,
-        Remaining = 0,
-        SaleType = SaleType.Common,
+        CompanyId = 1,
+        CustomerId = null,
+        OrderType = OrderType.Retail.ToString(),
+        OrderNumber = $"RTL-{DateTime.UtcNow:yyyyMMddHHmmss}",
+        Currency = "EUR",
+        TotalAmount = 0m,
+        TotalVatAmount = 0m,
+        BalanceDue = 0m,
+        Notes = null,
+        CreatedByEmployeeId = 1,
+        SalesChannel = SalesChannel.InStore,
+        DeviceId = null,
+        TechnicianId = null,
+        CheckInNotes = null,
+        EstimatedCompletion = null,
+        PlacedAt = DateTime.UtcNow,
+        WarrantyDays = null,
         Status = OrderStatus.Created,
-        Created = DateTime.UtcNow
+        Lines = new List<OrderLineRequest>()
     };
 
-    private List<Customer>? customers;
-    private List<Employee>? employees;
-    private bool isSubmitting = false;
+    private List<CustomerResponse>? customers;
+    private bool isSubmitting;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCustomers();
-        await LoadEmployees();
+        await LoadCustomersAsync();
     }
 
-    private async Task LoadCustomers()
+    private async Task LoadCustomersAsync()
     {
         try
         {
-            customers = (await CustomerService.GetCustomersAsync(1))?.ToList();
+            customers = (await CustomerService.GetCustomersAsync(orderModel.CompanyId))?.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading customers: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to load customers: {ex.Message}");
         }
     }
 
-    private async Task LoadEmployees()
-    {
-        try
-        {
-            // For now, we'll create a mock list. In a real app, you'd have an EmployeeService
-            employees = new List<Employee>
-{
-new Employee { EmployeeId = 1, Person = new Person { FirstName = "John", LastName = "Doe" } },
-new Employee { EmployeeId = 2, Person = new Person { FirstName = "Jane", LastName = "Smith" } }
-};
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading employees: {ex.Message}");
-        }
-    }
     private async Task HandleValidSubmitAsync()
     {
+        if (!orderModel.CustomerId.HasValue)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please select a customer.");
+            return;
+        }
+
         isSubmitting = true;
         StateHasChanged();
 
         try
         {
-            var createdSale = await SaleService.CreateSaleAsync(sale);
-            if (createdSale != null)
+            // Ensure there is at least an empty lines collection
+            if (orderModel.Lines == null)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Sale created successfully!");
+                orderModel.Lines = new List<OrderLineRequest>();
+            }
+            var created = await OrderService.CreateOrderAsync(orderModel);
+            if (created != null)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Order created successfully.");
                 Navigation.NavigateTo("/sales");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Failed to create sale. Please try again.");
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to create order.");
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error creating sale: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creating order: {ex.Message}");
         }
         finally
         {

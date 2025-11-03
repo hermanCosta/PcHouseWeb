@@ -1,0 +1,131 @@
+@page "/sales/{id:long}"
+@using PcHouseStore.Web.Models
+@using PcHouseStore.Web.Services
+@using PcHouseStore.Domain.Enums
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+<PageTitle>Order Details</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (order == null)
+{
+    <div class="alert alert-warning">Order not found.</div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>Order @order.OrderNumber</h2>
+                    <span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span>
+                </div>
+                <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+                    <i class="oi oi-arrow-left"></i> Back to Orders
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header"><h5>Order Summary</h5></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5">Order Type</dt>
+                            <dd class="col-7">@order.OrderType</dd>
+                            <dt class="col-5">Placed</dt>
+                            <dd class="col-7">@order.PlacedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
+                            <dt class="col-5">Total</dt>
+                            <dd class="col-7">?@order.TotalAmount.ToString("F2")</dd>
+                            <dt class="col-5">VAT</dt>
+                            <dd class="col-7">?@order.TotalVatAmount.ToString("F2")</dd>
+                            <dt class="col-5">Balance Due</dt>
+                            <dd class="col-7">?@order.BalanceDue.ToString("F2")</dd>
+                            <dt class="col-5">Sales Channel</dt>
+                            <dd class="col-7">@order.SalesChannel</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header"><h5>Customer</h5></div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>@order.CustomerName ?? "Walk-in"</strong></p>
+                        <p class="text-muted mb-0">Order ID: @order.OrderId</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (order.NotesHistory != null && order.NotesHistory.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header"><h5>Notes</h5></div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var note in order.NotesHistory)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@note.EmployeeName</strong> - @note.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                                        <div>@note.Note</div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private OrderResponse? order;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrderAsync();
+    }
+
+    private async Task LoadOrderAsync()
+    {
+        try
+        {
+            order = await OrderService.GetOrderAsync(Id);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/sales");
+    }
+
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
+    {
+        OrderStatus.Created => "bg-secondary",
+        OrderStatus.InProgress => "bg-info",
+        OrderStatus.Ready => "bg-primary",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-warning",
+        _ => "bg-secondary"
+    };
+}

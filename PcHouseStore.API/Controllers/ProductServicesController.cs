@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PcHouseStore.API.Models;
 using PcHouseStore.Domain.Models;
 using PcHouseStore.Infrastructure.Repositories;
 
@@ -16,47 +17,47 @@ public class ProductServicesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductService>>> GetProductServices([FromQuery] long companyId)
+    public async Task<ActionResult<IEnumerable<ProductServiceResponse>>> GetProductServices([FromQuery] long companyId)
     {
         if (companyId <= 0)
             return BadRequest("Company ID is required");
 
         var productServices = await _productServiceRepository.GetProductsByCompanyAsync(companyId);
-        return Ok(productServices);
+        return Ok(productServices.Select(ps => ProductServiceMapper.ToResponse(ps)));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductService>> GetProductService(long id)
+    public async Task<ActionResult<ProductServiceResponse>> GetProductService(long id)
     {
         var productService = await _productServiceRepository.GetByIdAsync(id);
         if (productService == null)
             return NotFound();
 
-        return Ok(productService);
+        return Ok(ProductServiceMapper.ToResponse(productService));
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<IEnumerable<ProductService>>> SearchProductServices([FromQuery] string searchTerm)
+    public async Task<ActionResult<IEnumerable<ProductServiceResponse>>> SearchProductServices([FromQuery] string searchTerm)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
             return BadRequest("Search term is required");
 
         var productServices = await _productServiceRepository.SearchProductsAsync(searchTerm);
-        return Ok(productServices);
+        return Ok(productServices.Select(ps => ProductServiceMapper.ToResponse(ps)));
     }
 
     [HttpGet("low-stock")]
-    public async Task<ActionResult<IEnumerable<ProductService>>> GetLowStockProducts([FromQuery] long companyId)
+    public async Task<ActionResult<IEnumerable<ProductServiceResponse>>> GetLowStockProducts([FromQuery] long companyId)
     {
         if (companyId <= 0)
             return BadRequest("Company ID is required");
 
         var lowStockProducts = await _productServiceRepository.GetLowStockProductsAsync(companyId);
-        return Ok(lowStockProducts);
+        return Ok(lowStockProducts.Select(ps => ProductServiceMapper.ToResponse(ps)));
     }
 
     [HttpGet("category/{category}")]
-    public async Task<ActionResult<IEnumerable<ProductService>>> GetProductsByCategory([FromQuery] long companyId, [FromRoute] string category)
+    public async Task<ActionResult<IEnumerable<ProductServiceResponse>>> GetProductsByCategory([FromQuery] long companyId, [FromRoute] string category)
     {
         if (companyId <= 0)
             return BadRequest("Company ID is required");
@@ -65,7 +66,7 @@ public class ProductServicesController : ControllerBase
             return BadRequest("Category is required");
 
         var productServices = await _productServiceRepository.GetProductsByCategoryAsync(companyId, category);
-        return Ok(productServices);
+        return Ok(productServices.Select(ps => ProductServiceMapper.ToResponse(ps)));
     }
 
     [HttpGet("check-exists")]
@@ -82,20 +83,33 @@ public class ProductServicesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ProductService>> CreateProductService([FromBody] ProductService productService)
+    public async Task<ActionResult<ProductServiceResponse>> CreateProductService([FromBody] CreateProductServiceRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         // Check if product already exists
-        var exists = await _productServiceRepository.CheckProductExistsAsync(productService.Name, productService.CompanyId);
+        var exists = await _productServiceRepository.CheckProductExistsAsync(request.Name, request.CompanyId);
         if (exists)
             return BadRequest("A product with this name already exists for this company");
 
         try
         {
+            var productService = new ProductService
+            {
+                CompanyId = request.CompanyId,
+                Name = request.Name,
+                Category = request.Category,
+                Price = request.Price,
+                Quantity = request.Quantity,
+                MinQuantity = request.MinQuantity,
+                Note = request.Note,
+                CreatedAt = DateTime.UtcNow
+            };
+
             var createdProductService = await _productServiceRepository.AddAsync(productService);
-            return CreatedAtAction(nameof(GetProductService), new { id = createdProductService.ProductServiceId }, createdProductService);
+            return CreatedAtAction(nameof(GetProductService), new { id = createdProductService.ProductServiceId }, 
+                ProductServiceMapper.ToResponse(createdProductService));
         }
         catch (Exception ex)
         {
@@ -104,18 +118,31 @@ public class ProductServicesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProductService(long id, [FromBody] ProductService productService)
+    public async Task<ActionResult<ProductServiceResponse>> UpdateProductService(long id, [FromBody] UpdateProductServiceRequest request)
     {
-        if (id != productService.ProductServiceId)
-            return BadRequest("ID mismatch");
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try
         {
+            var productService = await _productServiceRepository.GetByIdAsync(id);
+            if (productService == null)
+                return NotFound();
+
+            if (!string.IsNullOrEmpty(request.Name))
+                productService.Name = request.Name;
+            productService.Category = request.Category;
+            if (request.Price.HasValue)
+                productService.Price = request.Price.Value;
+            if (request.Quantity.HasValue)
+                productService.Quantity = request.Quantity.Value;
+            if (request.MinQuantity.HasValue)
+                productService.MinQuantity = request.MinQuantity.Value;
+            productService.Note = request.Note;
+            productService.UpdatedAt = DateTime.UtcNow;
+
             await _productServiceRepository.UpdateAsync(productService);
-            return NoContent();
+            return Ok(ProductServiceMapper.ToResponse(productService));
         }
         catch (Exception ex)
         {

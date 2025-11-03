@@ -1,16 +1,16 @@
-using PcHouseStore.Domain.Models;
+using PcHouseStore.Web.Models;
 
 namespace PcHouseStore.Web.Services;
 
 public class CompanyContext
 {
-    public Company? CurrentCompany { get; set; }
+    public CompanyResponse? CurrentCompany { get; set; }
     public bool IsAuthenticated => CurrentCompany != null;
     public long? CompanyId => CurrentCompany?.CompanyId;
 
     public event Action? OnCompanyChanged;
 
-    public void SetCompany(Company company)
+    public void SetCompany(CompanyResponse company)
     {
         CurrentCompany = company;
         OnCompanyChanged?.Invoke();

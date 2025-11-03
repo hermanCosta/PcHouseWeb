@@ -1,4 +1,4 @@
-using PcHouseStore.Domain.Models;
+using PcHouseStore.Web.Models;
 
 namespace PcHouseStore.Web.Services;
 
@@ -11,24 +11,24 @@ public class CompanyService
         _apiService = apiService;
     }
 
-    public async Task<IEnumerable<Company>?> GetCompaniesAsync()
+    public async Task<IEnumerable<CompanyResponse>?> GetCompaniesAsync()
     {
-        return await _apiService.GetListAsync<Company>("api/companies");
+        return await _apiService.GetListAsync<CompanyResponse>("api/companies");
     }
 
-    public async Task<Company?> GetCompanyAsync(long id)
+    public async Task<CompanyResponse?> GetCompanyAsync(long id)
     {
-        return await _apiService.GetAsync<Company>($"api/companies/{id}");
+        return await _apiService.GetAsync<CompanyResponse>($"api/companies/{id}");
     }
 
-    public async Task<Company?> CreateCompanyAsync(Company company)
+    public async Task<CompanyResponse?> CreateCompanyAsync(CreateCompanyRequest request)
     {
-        return await _apiService.PostAsync<Company>("api/companies", company);
+        return await _apiService.PostAsync<CreateCompanyRequest, CompanyResponse>("api/companies", request);
     }
 
-    public async Task<bool> UpdateCompanyAsync(Company company)
+    public async Task<CompanyResponse?> UpdateCompanyAsync(long id, UpdateCompanyRequest request)
     {
-        return await _apiService.PutAsync<Company>($"api/companies/{company.CompanyId}", company);
+        return await _apiService.PutAsync<UpdateCompanyRequest, CompanyResponse>($"api/companies/{id}", request);
     }
 
     public async Task<bool> DeleteCompanyAsync(long id)

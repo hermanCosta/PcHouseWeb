@@ -1,51 +1,109 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
-namespace PcHouseStore.Domain.Models
+namespace PcHouseStore.Domain.Models;
+
+[Table("company")]
+public class Company
 {
-    [Table("COMPANY")]
-    public class Company
+    [Key]
+    [Column("company_id")]
+    public long CompanyId { get; set; }
+
+    [Required]
+    [MaxLength(160)]
+    [Column("legal_name")]
+    public string LegalName { get; set; } = string.Empty;
+
+    [MaxLength(160)]
+    [Column("trading_name")]
+    public string? TradingName { get; set; }
+
+    [MaxLength(32)]
+    [Column("vat_number")]
+    public string? VatNumber { get; set; }
+
+    [MaxLength(32)]
+    [Column("registration_number")]
+    public string? RegistrationNumber { get; set; }
+
+    [MaxLength(255)]
+    [Column("email")]
+    public string? Email { get; set; }
+
+    [MaxLength(45)]
+    [Column("phone_primary")]
+    public string? PhonePrimary { get; set; }
+
+    [MaxLength(45)]
+    [Column("phone_secondary")]
+    public string? PhoneSecondary { get; set; }
+
+    [MaxLength(255)]
+    [Column("website")]
+    public string? Website { get; set; }
+
+    [Column("billing_address_id")]
+    public long? BillingAddressId { get; set; }
+
+    [Column("shipping_address_id")]
+    public long? ShippingAddressId { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public Address? BillingAddress { get; set; }
+    public Address? ShippingAddress { get; set; }
+
+    public ICollection<Customer> Customers { get; set; } = new List<Customer>();
+    public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+    public ICollection<CatalogItem> CatalogItems { get; set; } = new List<CatalogItem>();
+    public ICollection<PriceBook> PriceBooks { get; set; } = new List<PriceBook>();
+    public ICollection<RefurbItem> RefurbItems { get; set; } = new List<RefurbItem>();
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
+    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public ICollection<CashMovement> CashMovements { get; set; } = new List<CashMovement>();
+    public ICollection<DailyClosing> DailyClosings { get; set; } = new List<DailyClosing>();
+
+    [NotMapped]
+    public string Name
     {
-        [Key]
-        [Column("ID_COMPANY")]
-        public long CompanyId { get; set; }
-
-        [Required]
-        [Column("NAME")]
-        [MaxLength(45)]
-        public string Name { get; set; } = string.Empty;
-
-        [Required]
-        [Column("ADDRESS")]
-        [MaxLength(255)]
-        public string Address { get; set; } = string.Empty;
-
-        [Required]
-        [Column("CONTACT_ONE")]
-        [MaxLength(45)]
-        public string ContactOne { get; set; } = string.Empty;
-
-        [Column("CONTACT_TWO")]
-        [MaxLength(45)]
-        public string? ContactTwo { get; set; }
-
-        [Column("EMAIL")]
-        [MaxLength(255)]
-        public string? Email { get; set; }
-
-        [Column("PASSWORD")]
-        [MaxLength(255)]
-        public string? Password { get; set; }
-
-        // Navigation properties
-        public ICollection<Customer> Customers { get; set; } = new List<Customer>();
-        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
-        public ICollection<Sale> Sales { get; set; } = new List<Sale>();
-        public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
-        public ICollection<ProductService> ProductServices { get; set; } = new List<ProductService>();
-        public ICollection<Refurb> Refurbs { get; set; } = new List<Refurb>();
-        public ICollection<CashInRegistry> CashInRegistries { get; set; } = new List<CashInRegistry>();
-        public ICollection<CashOutRegistry> CashOutRegistries { get; set; } = new List<CashOutRegistry>();
-        public ICollection<Refund> Refunds { get; set; } = new List<Refund>();
+        get => TradingName ?? LegalName;
+        set => TradingName = value;
     }
+
+    [NotMapped]
+    public string? ContactOne
+    {
+        get => PhonePrimary;
+        set => PhonePrimary = value;
+    }
+
+    [NotMapped]
+    public string? ContactTwo
+    {
+        get => PhoneSecondary;
+        set => PhoneSecondary = value;
+    }
+
+    [NotMapped]
+    public string? Address
+    {
+        get
+        {
+            if (BillingAddress is null)
+            {
+                return null;
+            }
+
+            var parts = new[] { BillingAddress.Line1, BillingAddress.Line2, BillingAddress.City, BillingAddress.County, BillingAddress.Postcode };
+            return string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+        }
+        set { /* compatibility shim - ignored */ }
+    }
+
+    [NotMapped]
+    public string? Password { get; set; }
 }

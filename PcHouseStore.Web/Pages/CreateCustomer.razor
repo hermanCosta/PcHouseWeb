@@ -1,5 +1,6 @@
 @page "/customers/create"
 @using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
 @inject CustomerService CustomerService
 @inject CompanyService CompanyService
@@ -53,10 +54,10 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Contact Number *</label>
-                                    <input type="tel" class="form-control" @bind="person.ContactNo"
+                                    <label class="form-label">Mobile Number *</label>
+                                    <input type="tel" class="form-control" @bind="person.PhoneMobile"
                                         placeholder="Enter contact number" required />
-                                    <ValidationMessage For="@(() => person.ContactNo)" />
+                                    <ValidationMessage For="@(() => person.PhoneMobile)" />
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -77,7 +78,7 @@
                                 {
                                     @foreach (var company in companies)
                                     {
-                                        <option value="@company.CompanyId">@company.Name</option>
+                                        <option value="@company.CompanyId">@GetCompanyDisplayName(company)</option>
                                     }
                                 }
                             </select>
@@ -108,17 +109,17 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2">
-                        <strong>Name:</strong> @person.FullName
+                        <strong>Name:</strong> @person.DisplayName
                     </div>
                     <div class="mb-2">
-                        <strong>Contact:</strong> @person.ContactNo
+                        <strong>Contact:</strong> @person.PhoneMobile
                     </div>
                     <div class="mb-2">
                         <strong>Email:</strong> @(person.Email ?? "N/A")
                     </div>
                     <div class="mb-2">
-                        <strong>Company:</strong> @(companies?.FirstOrDefault(c => c.CompanyId ==
-                                                customer.CompanyId)?.Name ??
+                        <strong>Company:</strong> @(GetCompanyDisplayName(companies?.FirstOrDefault(c => c.CompanyId ==
+                                                customer.CompanyId)) ??
                                                 "N/A")
                     </div>
                 </div>
@@ -151,7 +152,7 @@
 
     private Person person = new();
 
-    private List<Company>? companies;
+    private List<CompanyResponse>? companies;
     private bool isSubmitting = false;
 
     protected override async Task OnInitializedAsync()
@@ -178,12 +179,22 @@
 
         try
         {
-            // First create the person
-            // In a real app, you'd have a PersonService
-            person.PersonId = 1; // Mock ID
-            customer.PersonId = person.PersonId;
+            // TODO: Create Person first via PersonService/Person API endpoint
+            // For now, this assumes PersonId is provided or needs to be created separately
+            // This is a temporary solution - Person creation should be handled via API
+            if (person.PersonId == 0)
+            {
+                await JSRuntime.InvokeAsync<object>("alert", "Person must be created first. Please implement PersonService.");
+                return;
+            }
 
-            var createdCustomer = await CustomerService.CreateCustomerAsync(customer);
+            var request = new CreateCustomerRequest(
+                person.PersonId,
+                customer.CompanyId,
+                customer.MarketingOptIn
+            );
+
+            var createdCustomer = await CustomerService.CreateCustomerAsync(request);
             if (createdCustomer != null)
             {
                 await JSRuntime.InvokeAsync<object>("alert", "Customer created successfully!");
@@ -208,5 +219,14 @@
     private void Cancel()
     {
         Navigation.NavigateTo("/customers");
+    }
+    private static string GetCompanyDisplayName(CompanyResponse? company)
+    {
+        if (company is null)
+        {
+            return "";
+        }
+
+        return company.Name;
     }
 }

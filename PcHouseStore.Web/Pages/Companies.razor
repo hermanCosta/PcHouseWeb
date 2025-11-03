@@ -1,5 +1,6 @@
 @page "/companies"
 @using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
 @inject CompanyService CompanyService
 @inject CompanyContext CompanyContext
@@ -70,15 +71,15 @@ else
                         </div>
                         <div class="card-body">
                             <div class="mb-2">
-                                <strong>Address:</strong> @company.Address
+                                <strong>Address:</strong> @(company.BillingAddress ?? "N/A")
                             </div>
                             <div class="mb-2">
-                                <strong>Primary Contact:</strong> @company.ContactOne
+                                <strong>Primary Contact:</strong> @(company.PhonePrimary ?? "N/A")
                             </div>
-                            @if (!string.IsNullOrEmpty(company.ContactTwo))
+                            @if (!string.IsNullOrEmpty(company.PhoneSecondary))
                             {
                                 <div class="mb-2">
-                                    <strong>Secondary Contact:</strong> @company.ContactTwo
+                                    <strong>Secondary Contact:</strong> @company.PhoneSecondary
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(company.Email))
@@ -112,7 +113,7 @@ else
 }
 
 @code {
-    private List<Company>? companies;
+    private List<CompanyResponse>? companies;
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()

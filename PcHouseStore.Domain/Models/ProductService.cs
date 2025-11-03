@@ -1,67 +1,54 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PcHouseStore.Domain.Models
+namespace PcHouseStore.Domain.Models;
+
+[Table("product_service")]
+public class ProductService
 {
-    [Table("PROD_SERV")]
-    public class ProductService
-    {
-        [Key]
-        [Column("ID_PROD_SERV")]
-        public long ProductServiceId { get; set; }
+    [Key]
+    [Column("product_service_id")]
+    public long ProductServiceId { get; set; }
 
-        [Required]
-        [Column("NAME")]
-        [MaxLength(100)]
-        public string Name { get; set; } = string.Empty;
+    [Required]
+    [Column("company_id")]
+    public long CompanyId { get; set; }
 
-        [Column("QTY")]
-        public int Quantity { get; set; } = 1;
+    [Required]
+    [MaxLength(160)]
+    [Column("name")]
+    public string Name { get; set; } = string.Empty;
 
-        [Column("PRICE")]
-        public double? Price { get; set; }
+    [MaxLength(100)]
+    [Column("category")]
+    public string? Category { get; set; }
 
-        [Column("MIN_QTY")]
-        public int MinQuantity { get; set; } = 1;
+    [Required]
+    [Column("price", TypeName = "decimal(18,2)")]
+    public decimal Price { get; set; }
 
-        [Column("CATEGORY")]
-        [MaxLength(45)]
-        public string? Category { get; set; }
+    [Required]
+    [Column("quantity")]
+    public int Quantity { get; set; }
 
-        [Column("NOTE")]
-        [MaxLength(255)]
-        public string? Note { get; set; }
+    [Required]
+    [Column("min_quantity")]
+    public int MinQuantity { get; set; }
 
-        [Column("ID_COMPANY")]
-        public long CompanyId { get; set; }
+    [Column("note")]
+    public string? Note { get; set; }
 
-        // Navigation properties
-        public Company Company { get; set; } = null!;
-        public ICollection<SaleProdServ> SaleProdServs { get; set; } = new List<SaleProdServ>();
-        public ICollection<ServiceOrderProdServ> ServiceOrderProdServs { get; set; } = new List<ServiceOrderProdServ>();
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Validation
-        public void SetQty(int qty)
-        {
-            if (qty < 0)
-                throw new ArgumentException("Qty cannot be negative.");
-            Quantity = qty;
-        }
+    [Column("updated_at")]
+    public DateTime? UpdatedAt { get; set; }
 
-        public void SetPrice(double? price)
-        {
-            if (price.HasValue && price < 0)
-                throw new ArgumentException("Price cannot be negative.");
-            Price = price;
-        }
+    // Navigation property
+    public Company Company { get; set; } = null!;
 
-        public void SetMinQty(int minQty)
-        {
-            if (minQty < 0)
-                throw new ArgumentException("Minimum qty cannot be negative.");
-            MinQuantity = minQty;
-        }
-
-        public bool IsLowStock => Quantity <= MinQuantity;
-    }
+    // Computed property
+    [NotMapped]
+    public bool IsLowStock => Quantity <= MinQuantity;
 }
+

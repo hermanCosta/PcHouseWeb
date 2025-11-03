@@ -1,47 +1,43 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using PcHouseStore.Domain.Enums;
 
-namespace PcHouseStore.Domain.Models
+namespace PcHouseStore.Domain.Models;
+
+[Table("refund")]
+public class Refund
 {
-    [Table("REFUND")]
-    public class Refund
-    {
-        [Key]
-        [Column("ID_REFUND")]
-        public long RefundId { get; set; }
+    [Key]
+    [Column("refund_id")]
+    public long RefundId { get; set; }
 
-        [Column("ID_COMPANY")]
-        public long CompanyId { get; set; }
+    [Required]
+    [Column("order_id")]
+    public long OrderId { get; set; }
 
-        [Column("ID_EMPLOYEE")]
-        public long EmployeeId { get; set; }
+    [Required]
+    [Column("payment_id")]
+    public long PaymentId { get; set; }
 
-        [Column("ID_SERVICE_ORDER")]
-        public long? ServiceOrderId { get; set; }
+    [Required]
+    [Column("reason_code")]
+    public RefundReason ReasonCode { get; set; } = RefundReason.Other;
 
-        [Column("ID_SALE")]
-        public long? SaleId { get; set; }
+    [Required]
+    [Precision(12, 2)]
+    [Column("amount")]
+    public decimal Amount { get; set; }
 
-        [Required]
-        [Column("AMOUNT")]
-        public double Amount { get; set; }
+    [Required]
+    [Column("processed_by")]
+    public long ProcessedByEmployeeId { get; set; }
 
-        [Required]
-        [Column("DT_CREATED")]
-        public DateTime DtCreated { get; set; } = DateTime.UtcNow;
+    [Required]
+    [Column("processed_at")]
+    public DateTime ProcessedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties
-        public Company Company { get; set; } = null!;
-        public Employee Employee { get; set; } = null!;
-        public ServiceOrder? ServiceOrder { get; set; }
-        public Sale? Sale { get; set; }
-
-        // Validation
-        public void SetAmount(double amount)
-        {
-            if (amount < 0)
-                throw new ArgumentException("Amount cannot be negative.");
-            Amount = amount;
-        }
-    }
+    public Order Order { get; set; } = null!;
+    public Payment Payment { get; set; } = null!;
+    public Employee ProcessedBy { get; set; } = null!;
 }

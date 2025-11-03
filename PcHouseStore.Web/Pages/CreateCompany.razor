@@ -1,5 +1,6 @@
 @page "/companies/create"
 @using PcHouseStore.Domain.Models
+@using PcHouseStore.Web.Models
 @using PcHouseStore.Web.Services
 @inject CompanyService CompanyService
 @inject NavigationManager Navigation
@@ -31,9 +32,14 @@
                         <DataAnnotationsValidator />
                         
                         <div class="mb-3">
-                            <label class="form-label">Company Name *</label>
-                            <input type="text" class="form-control" @bind="company.Name" placeholder="Enter company name" required />
-                            <ValidationMessage For="@(() => company.Name)" />
+                            <label class="form-label">Legal Name *</label>
+                            <input type="text" class="form-control" @bind="company.LegalName" placeholder="Enter legal company name" required />
+                            <ValidationMessage For="@(() => company.LegalName)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Trading Name (Optional)</label>
+                            <input type="text" class="form-control" @bind="company.TradingName" placeholder="Enter trading name if different" />
                         </div>
 
                         <div class="mb-3">
@@ -94,8 +100,14 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2">
-                        <strong>Name:</strong> @company.Name
+                        <strong>Legal Name:</strong> @company.LegalName
                     </div>
+                    @if (!string.IsNullOrEmpty(company.TradingName))
+                    {
+                        <div class="mb-2">
+                            <strong>Trading Name:</strong> @company.TradingName
+                        </div>
+                    }
                     <div class="mb-2">
                         <strong>Address:</strong> @company.Address
                     </div>
@@ -130,15 +142,7 @@
 </div>
 
 @code {
-    private Company company = new()
-    {
-        Name = "",
-        Address = "",
-        ContactOne = "",
-        ContactTwo = "",
-        Email = "",
-        Password = ""
-    };
+    private CreateCompanyModel company = new();
 
     private bool isSubmitting = false;
 
@@ -149,7 +153,20 @@
 
         try
         {
-            var createdCompany = await CompanyService.CreateCompanyAsync(company);
+            var request = new CreateCompanyRequest(
+                company.LegalName ?? "",
+                company.TradingName,
+                company.VatNumber,
+                company.RegistrationNumber,
+                company.Email,
+                company.PhonePrimary,
+                company.PhoneSecondary,
+                company.Website,
+                null, // BillingAddressId - would need address creation service
+                null  // ShippingAddressId - would need address creation service
+            );
+
+            var createdCompany = await CompanyService.CreateCompanyAsync(request);
             if (createdCompany != null)
             {
                 await JSRuntime.InvokeAsync<object>("alert", "Company created successfully!");
@@ -168,6 +185,39 @@
         {
             isSubmitting = false;
             StateHasChanged();
+        }
+    }
+
+    private class CreateCompanyModel
+    {
+        public string LegalName { get; set; } = "";
+        public string? TradingName { get; set; }
+        public string? VatNumber { get; set; }
+        public string? RegistrationNumber { get; set; }
+        public string? Email { get; set; }
+        public string? PhonePrimary { get; set; }
+        public string? PhoneSecondary { get; set; }
+        public string? Website { get; set; }
+        public string? Address { get; set; }
+        public string? Password { get; set; }
+
+        // Helper properties for UI binding
+        public string Name
+        {
+            get => TradingName ?? LegalName;
+            set => TradingName = value;
+        }
+
+        public string? ContactOne
+        {
+            get => PhonePrimary;
+            set => PhonePrimary = value;
+        }
+
+        public string? ContactTwo
+        {
+            get => PhoneSecondary;
+            set => PhoneSecondary = value;
         }
     }
 

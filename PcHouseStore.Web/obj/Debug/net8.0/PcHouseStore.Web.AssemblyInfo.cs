@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PcHouseStore.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7dde423baaab170bbfd7ed642b38d26fe545210d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+67a45fab6ad8c428d026aea906a77b96df014637")]
 [assembly: System.Reflection.AssemblyProductAttribute("PcHouseStore.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PcHouseStore.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

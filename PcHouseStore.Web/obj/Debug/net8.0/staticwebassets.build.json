@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "bbHzRI/5tg++UTbb3D4xEfUwex5QuEBoMvfZZ1IZcw8=",
+  "Hash": "9pQ04gR1JAsN1O9dkJ6c37r84tQnsFXuX0tmxMriozI=",
   "Source": "PcHouseStore.Web",
   "BasePath": "_content/PcHouseStore.Web",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "PcHouseStore.Web/wwwroot",
       "Source": "PcHouseStore.Web",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/PcHouseStore.Web.styles.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/PcHouseStore.Web.styles.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Computed",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "PcHouseStore.Web.styles.css",
       "AssetKind": "All",
@@ -33,13 +33,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/PcHouseStore.Web.styles.css"
+      "OriginalItemSpec": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/bundle/PcHouseStore.Web.styles.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/PcHouseStore.Web.bundle.scp.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/PcHouseStore.Web.bundle.scp.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Computed",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "PcHouseStore.Web.bundle.scp.css",
       "AssetKind": "All",
@@ -52,13 +52,13 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/PcHouseStore.Web.bundle.scp.css"
+      "OriginalItemSpec": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/Debug/net8.0/scopedcss/projectbundle/PcHouseStore.Web.bundle.scp.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/bootstrap/bootstrap.min.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/bootstrap/bootstrap.min.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/bootstrap/bootstrap.min.css",
       "AssetKind": "All",
@@ -74,10 +74,10 @@
       "OriginalItemSpec": "wwwroot/css/bootstrap/bootstrap.min.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/bootstrap/bootstrap.min.css.map",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/bootstrap/bootstrap.min.css.map",
       "AssetKind": "All",
@@ -93,10 +93,10 @@
       "OriginalItemSpec": "wwwroot/css/bootstrap/bootstrap.min.css.map"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/FONT-LICENSE",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/FONT-LICENSE",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/FONT-LICENSE",
       "AssetKind": "All",
@@ -112,10 +112,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/FONT-LICENSE"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/css/open-iconic-bootstrap.min.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/css/open-iconic-bootstrap.min.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/css/open-iconic-bootstrap.min.css",
       "AssetKind": "All",
@@ -131,10 +131,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/css/open-iconic-bootstrap.min.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.eot",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.eot",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/fonts/open-iconic.eot",
       "AssetKind": "All",
@@ -150,10 +150,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/fonts/open-iconic.eot"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.otf",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.otf",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/fonts/open-iconic.otf",
       "AssetKind": "All",
@@ -169,10 +169,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/fonts/open-iconic.otf"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.svg",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.svg",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/fonts/open-iconic.svg",
       "AssetKind": "All",
@@ -188,10 +188,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/fonts/open-iconic.svg"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.ttf",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.ttf",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/fonts/open-iconic.ttf",
       "AssetKind": "All",
@@ -207,10 +207,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/fonts/open-iconic.ttf"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.woff",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/font/fonts/open-iconic.woff",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/font/fonts/open-iconic.woff",
       "AssetKind": "All",
@@ -226,10 +226,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/font/fonts/open-iconic.woff"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/ICON-LICENSE",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/ICON-LICENSE",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/ICON-LICENSE",
       "AssetKind": "All",
@@ -245,10 +245,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/ICON-LICENSE"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/README.md",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/open-iconic/README.md",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/open-iconic/README.md",
       "AssetKind": "All",
@@ -264,10 +264,10 @@
       "OriginalItemSpec": "wwwroot/css/open-iconic/README.md"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/pchouse-theme.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/pchouse-theme.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/pchouse-theme.css",
       "AssetKind": "All",
@@ -283,10 +283,10 @@
       "OriginalItemSpec": "wwwroot/css/pchouse-theme.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/site.css",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/css/site.css",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "css/site.css",
       "AssetKind": "All",
@@ -302,10 +302,10 @@
       "OriginalItemSpec": "wwwroot/css/site.css"
     },
     {
-      "Identity": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/favicon.ico",
+      "Identity": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/favicon.ico",
       "SourceId": "PcHouseStore.Web",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
+      "ContentRoot": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/wwwroot/",
       "BasePath": "_content/PcHouseStore.Web",
       "RelativePath": "favicon.ico",
       "AssetKind": "All",

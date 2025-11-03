@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj": {}
+    "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj": {}
   },
   "projects": {
-    "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
+    "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj",
+        "projectUniqueName": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj",
         "projectName": "PcHouseStore.Domain",
-        "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj",
+        "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj",
         "packagesPath": "/Users/HermanCosta/.nuget/packages/",
-        "outputPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/obj/",
+        "outputPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/HermanCosta/.nuget/NuGet/NuGet.Config"
@@ -37,6 +37,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -57,14 +63,14 @@
         }
       }
     },
-    "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj": {
+    "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj",
+        "projectUniqueName": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj",
         "projectName": "PcHouseStore.Infrastructure",
-        "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj",
+        "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj",
         "packagesPath": "/Users/HermanCosta/.nuget/packages/",
-        "outputPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/obj/",
+        "outputPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/HermanCosta/.nuget/NuGet/NuGet.Config"
@@ -79,8 +85,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
-                "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj"
+              "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
+                "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj"
               }
             }
           }
@@ -97,19 +103,19 @@
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.11, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.11, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.11, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.2, )"
             }
           },
           "imports": [
@@ -132,14 +138,14 @@
         }
       }
     },
-    "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj": {
+    "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj",
+        "projectUniqueName": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj",
         "projectName": "PcHouseStore.Web",
-        "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj",
+        "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/PcHouseStore.Web.csproj",
         "packagesPath": "/Users/HermanCosta/.nuget/packages/",
-        "outputPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Web/obj/",
+        "outputPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Web/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/HermanCosta/.nuget/NuGet/NuGet.Config"
@@ -154,11 +160,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
-                "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj"
+              "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj": {
+                "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Domain/PcHouseStore.Domain.csproj"
               },
-              "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj": {
-                "projectPath": "/Users/HermanCosta/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj"
+              "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj": {
+                "projectPath": "/Users/HermanCosta/VSProjects/PcHouseStoreWeb/PcHouseStore.Infrastructure/PcHouseStore.Infrastructure.csproj"
               }
             }
           }

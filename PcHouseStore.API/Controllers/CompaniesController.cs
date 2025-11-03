@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PcHouseStore.API.Models;
 using PcHouseStore.Domain.Models;
+using PcHouseStore.Infrastructure.Data;
 using PcHouseStore.Infrastructure.Repositories;
 
 namespace PcHouseStore.API.Controllers;
@@ -9,39 +12,72 @@ namespace PcHouseStore.API.Controllers;
 public class CompaniesController : ControllerBase
 {
     private readonly IRepository<Company> _companyRepository;
+    private readonly PcHouseStoreDbContext _context;
 
-    public CompaniesController(IRepository<Company> companyRepository)
+    public CompaniesController(IRepository<Company> companyRepository, PcHouseStoreDbContext context)
     {
         _companyRepository = companyRepository;
+        _context = context;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
+    public async Task<ActionResult<IEnumerable<CompanyResponse>>> GetCompanies()
     {
-        var companies = await _companyRepository.GetAllAsync();
-        return Ok(companies);
+        var companies = await _context.Companies
+            .Include(c => c.BillingAddress)
+            .Include(c => c.ShippingAddress)
+            .ToListAsync();
+        
+        return Ok(companies.Select(c => CompanyMapper.ToResponse(c)));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Company>> GetCompany(long id)
+    public async Task<ActionResult<CompanyResponse>> GetCompany(long id)
     {
-        var company = await _companyRepository.GetByIdAsync(id);
+        var company = await _context.Companies
+            .Include(c => c.BillingAddress)
+            .Include(c => c.ShippingAddress)
+            .FirstOrDefaultAsync(c => c.CompanyId == id);
+        
         if (company == null)
             return NotFound();
 
-        return Ok(company);
+        return Ok(CompanyMapper.ToResponse(company));
     }
 
     [HttpPost]
-    public async Task<ActionResult<Company>> CreateCompany([FromBody] Company company)
+    public async Task<ActionResult<CompanyResponse>> CreateCompany([FromBody] CreateCompanyRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try
         {
+            var company = new Company
+            {
+                LegalName = request.LegalName,
+                TradingName = request.TradingName,
+                VatNumber = request.VatNumber,
+                RegistrationNumber = request.RegistrationNumber,
+                Email = request.Email,
+                PhonePrimary = request.PhonePrimary,
+                PhoneSecondary = request.PhoneSecondary,
+                Website = request.Website,
+                BillingAddressId = request.BillingAddressId,
+                ShippingAddressId = request.ShippingAddressId,
+                CreatedAt = DateTime.UtcNow
+            };
+
             var createdCompany = await _companyRepository.AddAsync(company);
-            return CreatedAtAction(nameof(GetCompany), new { id = createdCompany.CompanyId }, createdCompany);
+            
+            // Reload with addresses for response
+            var companyWithAddresses = await _context.Companies
+                .Include(c => c.BillingAddress)
+                .Include(c => c.ShippingAddress)
+                .FirstOrDefaultAsync(c => c.CompanyId == createdCompany.CompanyId);
+            
+            return CreatedAtAction(nameof(GetCompany), new { id = createdCompany.CompanyId }, 
+                CompanyMapper.ToResponse(companyWithAddresses!));
         }
         catch (Exception ex)
         {
@@ -50,18 +86,37 @@ public class CompaniesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCompany(long id, [FromBody] Company company)
+    public async Task<ActionResult<CompanyResponse>> UpdateCompany(long id, [FromBody] UpdateCompanyRequest request)
     {
-        if (id != company.CompanyId)
-            return BadRequest("ID mismatch");
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try
         {
+            var company = await _companyRepository.GetByIdAsync(id);
+            if (company == null)
+                return NotFound();
+
+            company.LegalName = request.LegalName;
+            company.TradingName = request.TradingName;
+            company.VatNumber = request.VatNumber;
+            company.RegistrationNumber = request.RegistrationNumber;
+            company.Email = request.Email;
+            company.PhonePrimary = request.PhonePrimary;
+            company.PhoneSecondary = request.PhoneSecondary;
+            company.Website = request.Website;
+            company.BillingAddressId = request.BillingAddressId;
+            company.ShippingAddressId = request.ShippingAddressId;
+
             await _companyRepository.UpdateAsync(company);
-            return NoContent();
+            
+            // Reload with addresses for response
+            var updatedCompany = await _context.Companies
+                .Include(c => c.BillingAddress)
+                .Include(c => c.ShippingAddress)
+                .FirstOrDefaultAsync(c => c.CompanyId == id);
+            
+            return Ok(CompanyMapper.ToResponse(updatedCompany!));
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-using PcHouseStore.Domain.Models;
+using PcHouseStore.Web.Models;
 
 namespace PcHouseStore.Web.Services;
 
@@ -11,29 +11,29 @@ public class CustomerService
         _apiService = apiService;
     }
 
-    public async Task<IEnumerable<Customer>?> GetCustomersAsync(long companyId)
+    public async Task<IEnumerable<CustomerResponse>?> GetCustomersAsync(long companyId)
     {
-        return await _apiService.GetListAsync<Customer>($"api/customers?companyId={companyId}");
+        return await _apiService.GetListAsync<CustomerResponse>($"api/customers?companyId={companyId}");
     }
 
-    public async Task<Customer?> GetCustomerAsync(long id)
+    public async Task<CustomerResponse?> GetCustomerAsync(long id)
     {
-        return await _apiService.GetAsync<Customer>($"api/customers/{id}");
+        return await _apiService.GetAsync<CustomerResponse>($"api/customers/{id}");
     }
 
-    public async Task<IEnumerable<Customer>?> SearchCustomersAsync(long companyId, string searchTerm)
+    public async Task<IEnumerable<CustomerResponse>?> SearchCustomersAsync(long companyId, string searchTerm)
     {
-        return await _apiService.GetListAsync<Customer>($"api/customers/search?companyId={companyId}&searchTerm={Uri.EscapeDataString(searchTerm)}");
+        return await _apiService.GetListAsync<CustomerResponse>($"api/customers/search?companyId={companyId}&searchTerm={Uri.EscapeDataString(searchTerm)}");
     }
 
-    public async Task<Customer?> CreateCustomerAsync(Customer customer)
+    public async Task<CustomerResponse?> CreateCustomerAsync(CreateCustomerRequest request)
     {
-        return await _apiService.PostAsync<Customer>("api/customers", customer);
+        return await _apiService.PostAsync<CreateCustomerRequest, CustomerResponse>("api/customers", request);
     }
 
-    public async Task<bool> UpdateCustomerAsync(Customer customer)
+    public async Task<CustomerResponse?> UpdateCustomerAsync(long id, UpdateCustomerRequest request)
     {
-        return await _apiService.PutAsync<Customer>($"api/customers/{customer.CustomerId}", customer);
+        return await _apiService.PutAsync<UpdateCustomerRequest, CustomerResponse>($"api/customers/{id}", request);
     }
 
     public async Task<bool> DeleteCustomerAsync(long id)

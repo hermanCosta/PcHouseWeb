@@ -1,25 +1,32 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PcHouseStore.Domain.Models
+namespace PcHouseStore.Domain.Models;
+
+[Table("customer")]
+public class Customer
 {
-    [Table("CUSTOMER")]
-    public class Customer
-    {
-        [Key]
-        [Column("ID_CUSTOMER")]
-        public long CustomerId { get; set; }
+    [Key]
+    [Column("customer_id")]
+    public long CustomerId { get; set; }
 
-        [Column("ID_PERSON")]
-        public long PersonId { get; set; }
+    [Required]
+    [Column("person_id")]
+    public long PersonId { get; set; }
 
-        [Column("ID_COMPANY")]
-        public long? CompanyId { get; set; }
+    [Column("company_id")]
+    public long? CompanyId { get; set; }
 
-        // Navigation properties
-        public Person Person { get; set; } = null!;
-        public Company? Company { get; set; }
-        public ICollection<Sale> Sales { get; set; } = new List<Sale>();
-        public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
-    }
+    [Required]
+    [Column("marketing_opt_in")]
+    public bool MarketingOptIn { get; set; }
+
+    [Required]
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public Person Person { get; set; } = null!;
+    public Company? Company { get; set; }
+    public ICollection<Device> Devices { get; set; } = new List<Device>();
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
